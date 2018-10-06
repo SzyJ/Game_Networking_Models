@@ -1,0 +1,4 @@
+#+TITLE: Dissertation Project Notes
+#+AUTHOR: Szymon Jackiewicz
+#+EMAIL: szy.jackiewicz@gmail.com
+#+OPTIONS: toc:nil num:nil
