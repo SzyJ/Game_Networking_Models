@@ -1,0 +1,9 @@
+*.aux
+*.pdf
+*.toc
+*.log
+
+Project/*
+Other_Documents/*
+Report/auto
+auto/*
