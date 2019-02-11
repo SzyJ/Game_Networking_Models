@@ -18,3 +18,20 @@ First of all, I will define some basic concepts and terminolory that will be use
 \\
 \\
 \textbf{Lag:} The grater the ping between two connected clients, the bigger the difference in the state of each clients' simulation once an action to be synchronised is performed. When a change is made by one client, this change should be seen by other clients participating in the same simulation and lag occurs when this change does not appear instentaneous to the user.
+
+\section{Networking principles in games}
+TODO: talk a bit about UDP, TCP/IP and routing...
+
+\subsection{The Centralised Server Model}
+Most online multiplayer games that are played today, make use of the ``centralised server model'' for sinchronising the simulation state between several clients participating in the same simulation. This means that in an example of a First Person Shooter (FPS), if one player presses the ``jump'' key, their character will jump and this information is would also be sent over to the game server. The server would then send the information that this player has jumped, to all other clients. There is a potential problem here however. Given that the ping between the server and client A is \(\alpha\) and between the server and client B is \(\beta\), the time between client A pressing an input and client B being notified of this input can not be less than $\alpha+\beta$ and due to the limitations of physics $\alpha>0$ and $\beta>0$. This means that at any given time the lag experianced between clients A and B will be more than $\alpha+\beta$ when processing times are factored in too. This leads to a problem of a poor experience for a client with a high ping to the server, as they will receive the updates from the server later than every other player and therefore be at a disadvantage if the game requires real time reactions. Unfortunately under some implementations, this also results in a poor experiance for every other player, who despite having resonable ping to the server, can be shot from behind cover by a laggy player who fired a shot before the cover was reached.
+\subsubsection{Possible solutions to the variable ping problem}
+TODO: talk about region locks, and disconnecting players with high ping but ping can be high even in normal conditions
+
+\subsubsection{Battelfield 1\textsuperscript{\textregistered} implementation}
+An interesting approach to this issue has been implemented by DICE in the game Battelfield 1. Given 2 players; player A with a low ping to the server and player B with a ping of <150ms to the server.
+
+When player B fires at a moving player A, player B's client will perform the check concluding that player A has been hit and this information is sent to the server. The server will then perform it's own checks and if the server agrees that this hit is possible, then it sends the hit confirmation to player B and damage information to player A. This approach is called Clientside-Server Authoritative as while the hit registration is calculated on clientside, the server must still confirm that this is valid.
+
+Concidering another scenario, suppose that player A still has a low ping to the server but player B, now has the ping of >150ms. An icon will appear on player B's UI showing an ``aim-lead'' indicator. Now when the shot is fired in the same scenario, the hit will not register anymore as the hit registration has switched from Clientside-Server Authoritative to Fully-Server Authoritative, meaning that the check is performed only once the shot information is received by the server.
+
+Whilest this implementation makes the game feel less responsive for players with high ping, it provides a lot more fairness for everyone else and allow for players with different pings play in a more fair way.
