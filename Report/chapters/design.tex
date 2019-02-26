@@ -5,9 +5,20 @@
 Test for inline: \lstinline{test Hello;}
 
 \section{Protocols}
-
 %fig:client-protocol
 \input{fixtures/client-protocol-graph}
+
+\subsection{Potential issues with the Client Hosted protocol}
+The protocol for establishing a connection and transfering of data can be found in Figure \ref{fig:client-protocol}. There are many potential flaws with this approach.
+\subsubsection{Packet Loss}
+Time outs in place in case response lost...
+resend....
+Resend request if no response....
+
+
+\subsubsection{Security}
+anyone could send update by spoofing ip
+
 
 \pagebreak
 \section{Message Codes}
