@@ -5,6 +5,85 @@
 Test for inline: \lstinline{test Hello;}
 
 \section{Protocols}
+During any connection that can be deployed between several processes on a machine or even different physical hardware in seperate geographical locaitons, many different protocols come into play.
+
+\subsection{Protocols in Network Communications}
+Firstly, in the network layer, most commonly the IP\footnote{IP: Internet Protocol} is employed however other options such as X.25 are also available but have more niche uses. These protocols are responsible for ``packaging'' the data to be sent between two different computers identified by their IP address. The packet from the sending machine, will travel through a network of routers that will eventually lead it to the machine with the IP address of the recieving machine.
+
+Next comes the transport layer where either UDP\footnote{UDP: User Datagram Protocol} or TCP\footnote{TCP: Transfer Control Protocol}  can be chosen, both have different properties, advantages, disadvantages, useses and both are used in game networking. The UPD protocol is a simple, connectionless protocol which will simply send a packet from one IP address to another. Since each packet sent with UDP, can take a different route through the router network, there is no guarantee that the packets will be received in the same order as they were sent in. Due to many different reasons, packet loss can occur, meaning that it also cannot be guaranteed that every packet sent with UDP will arrive at the destination at all. Despite these dissadvantages and due to the simplicity of how this protocol was designed with it's connectionless nature, it inately has a major advantage in the speed that the packets can just be sent out and forgotten about. The TCP protocol, is built upon UDP to add some important features for reliable data sharing at a cost of speen and use in real-time applications. The most important property of TCP includes the assurance that if a packet is not received by a recipient, it is requested to be resent to guarantee that every pacet that is sent, is also recieved. This also means that the packets are aranged in the same order that they were sent meaning that we can be sure that not only data will arrive at the destination, but it will arrive just as we sent it. This implementation has many obvious benefits and in most scenarios, the delay of possibly re-sending a packet if it was not received is neglegible. In real-time applications however, this is likely to be an unnecessary waste of time and resources as even id a packet is dropped and and resent, by that time, new updated information is available so resending the dropped packet is useless when a packet with new information could be sent at that time instead. Simply, old information is quickly outdated and it's more important to send new information then old, non-useful information.
+
+The next layer of protocols is the Operating System Iterface or library, that is called by applications needing to share data using the above protocols. With Windows, a library called ``WinSock'' is often used, however other options are also available such as enet, asio, RakNet... This is where a programmer would be able to configure which protocols to use (Like TCP or UDP, IP or X.25 amongst many other configurable options).
+
+
+\subsection{Message Structure Startegies}
+
+\subsubsection{Data Representation Strategies}
+There are many different ways that the same data can be represented and each one is carefully designed to be the most appropriate for it's use. Please consider the two figures below of common way of goruping complex data in an ``easily readable'' format; XML in Figure \ref{fig:xml-example} and JSON in Figure \ref{fig:json-example}.
+
+\newpage
+\begin{figure}[!ht]
+\begin{lstlisting}[language=xml]
+<world_update world_time="0.0">
+  <object id="1" class="player">
+    <property name="position" value="(0,0,0)"></property>
+    <property name="orientation" value="(1,0,0,0)"></property>
+    <property name="velocity" value="(10,0,0)"></property>
+    <property name="health" value="100"></property>
+    <property name="weapon" value="110"></property>
+    ... 100s more properties per-object ...
+ </object>
+ <object id="110" class="weapon">
+   <property type="semi-automatic"></property>
+   <property ammo_in_clip="8"></property>
+   <property round_in_chamber="true"></property>
+ </object>
+ ... 1000s more objects ...
+</world_update>
+\end{lstlisting}
+
+\caption{An example of a representation of world data in the XML format}
+\label{fig:xml-example}
+\end{figure}
+
+\begin{figure}[!ht]
+\begin{lstlisting}[language=xml]
+  {
+  "world_time": 0.0,
+  "objects": {
+    1: {
+      "class": "player",
+      "position": "(0,0,0)",
+      "orientation": "(1,0,0,0)",
+      "velocity": "(10,0,0)",
+      "health": 100,
+      "weapon": 110
+    }
+    110: {
+      "class": "weapon",
+      "type": "semi-automatic"
+      "ammo_in_clip": 8,
+      "round_in_chamber": 1
+    }
+    // etc...
+  }
+}
+
+\end{lstlisting}
+
+\caption{An example of a representation of world data in the JSON format}
+\label{fig:json-example}
+\end{figure}
+
+\newpage
+
+
+\subsubsection{Checking for Packet Loss in connection}
+The packet information could contain a certain amount of bits that would be incremented with each simulation step\footnote{A simulation step refers to a state of values that represent the current state of a simulation. Each time the values are updated, is a new simulation step. This is often done and broadcasted several times a second in central server models.}. This counter value could loop round when a maximum value is reached as long as several simulation steps in a row have unique values. The receiver could evaluate this value when received, checking if a packet has been dropped since the last received update. Knowledge about the quality of the connection could be important information when determining how much of the simulation has to be estimated between the received updates and could also be vital information to the player when in a game demanding split-second reaction time allowing them to change their strategy with the knowledge that they may be at a dissadvantage against other players.
+
+
+
+\newpage
+
 %fig:client-protocol
 \input{fixtures/client-protocol-graph}
 
