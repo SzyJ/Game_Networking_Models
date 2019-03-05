@@ -1,4 +1,4 @@
-% Last Update Time-stamp: <04-03-2019>
+% Last Update Time-stamp: <05-03-2019>
 \documentclass[12pt,twoside]{report}
 
 \usepackage[utf8]{inputenc}
@@ -15,9 +15,11 @@
 \usepackage[UKenglish]{datetime}
 \usepackage{pgf-umlsd}
 \usepackage[T1]{fontenc}
-
+\usepackage[backend=biber, style=authoryear-icomp]{biblatex}
 
 \graphicspath{{images/}}
+\addbibresource{references.bib}
+
 
 \title{Minimising Lag in Game Networking Models Without a Central Server}
 \author{Szymon Jackiewicz}
@@ -25,6 +27,9 @@
 \makeatletter
 \let\thisauthor\@author
 \let\thistitle\@title
+
+\newcommand{\mycite}[1]{\citetitle{#1}(\citeauthor{#1})}
+
 
 \definecolor{pblue}{rgb}{0.13,0.13,1}
 \definecolor{pgreen}{rgb}{0,0.5,0}
@@ -83,6 +88,10 @@
 \input{chapters/research}
 
 \input{chapters/design}
+
 \appendix
 \input{chapters/appendix}
+
+\printbibliography[title=References]
+
 \end{document}

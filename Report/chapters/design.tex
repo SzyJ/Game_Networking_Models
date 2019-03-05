@@ -17,8 +17,8 @@ The next layer of protocols is the Operating System Iterface or library, that is
 
 \subsection{Message Structure Startegies}
 
-\subsubsection{Data Representation Strategies}
-There are many different ways that the same data can be represented and each one is carefully designed to be the most appropriate for it's use. Please consider the two figures below of common way of goruping complex data in an ``easily readable'' format; XML in Figure \ref{fig:xml-example} and JSON in Figure \ref{fig:json-example}.
+\subsubsection{Data Representation}
+There are many different ways that the same data can be represented and each one is carefully designed to be the most appropriate for it's use. Consider the two figures below of common ways of goruping complex data in an ``easily readable'' format; XML in Figure \ref{fig:xml-example} and JSON in Figure \ref{fig:json-example}. These example have been adapted from the article \mycite{fiedler2016packets}.
 
 \newpage
 \begin{figure}[!ht]
@@ -47,7 +47,7 @@ There are many different ways that the same data can be represented and each one
 
 \begin{figure}[!ht]
 \begin{lstlisting}[language=xml]
-  {
+{
   "world_time": 0.0,
   "objects": {
     1: {
@@ -67,7 +67,6 @@ There are many different ways that the same data can be represented and each one
     // etc...
   }
 }
-
 \end{lstlisting}
 
 \caption{An example of a representation of world data in the JSON format}
