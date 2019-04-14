@@ -7,7 +7,7 @@
     \newinst{key-lsn}{Keyboard Listener}{}
     \newthread{server}{Server}{}
 
-    \begin{sdblock}{Connection}{}
+    \begin{sdblock}{Connection - TCP protocol}{}
 
       \begin{call}{server}{openToClientConnection()}{server}{\textit{Once all clients connect...}}
         \postlevel
@@ -18,18 +18,18 @@
 
       \prelevel \prelevel \prelevel
       \prelevel \prelevel
-      \mess{client}{JR}{server}
+      \mess{client}{JR[UDP Port to use]}{server}
       \begin{call}{client}{listenForServerMsg()}{client}{}
         \mess{server}{JA<ID>}{client}
       \end{call}
 
 
       \begin{call}{client}{listenForServerMsg()}{client}{}
-        \mess{server}{DE< <ID><VAL> ... >}{client}
+        \mess{server}{DE[<ID><VAL>...]}{client}
       \end{call}
     \end{sdblock}
 
-    \begin{sdblock}{Update Loop}{}
+    \begin{sdblock}{Update Loop - UDP protocol}{}
 
       \begin{call}{server}{startUpdateLoop()}{server}{\textit{simulation finished}}
         \postlevel \postlevel \postlevel

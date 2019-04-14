@@ -4,6 +4,24 @@ Throughout this project, I will be exploring the different methods of providing 
 
 I will explore the existing methods of writing an online multiplayer game from scratch and aim to provide an implementation of a networking library for online games to communicate without a central server. I also aim to provide analysis of efficieny of different methods of achieving this goal.
 
+\section{Project Goals}
+When developing a multiplayer game the most important aspect of the codebase is likely to be the networking functionality and speed. In most games designed for two or more players interacting with each other or the environment, the whole experiance can be ruined by slow or inefficient networking implementation. The most common way for games publishers/developers to address this, is to rent out servers space optimised for fast network speeds and a large amount of processing power. This allows each player to connect to a central known entity that can be trusted to be fast enough to handle the load of processing each simulation step and broadcasting information quickly. This solution provides many benefits in terms of security, cheating prevention and fairness, however it is an expensive investment and risk for games developed on a smaller budget.
+
+I will be investigating other options that exist for the smaller budget projects and how to make the gameplay as seamless as possible with the limitations of consumer hardware and network connections. While some aspects of this, such as high ping between clients due to a bad network connection or suboptimal routing are out of control of the implementation, there are many ways that the game netcode can be implemented to minimise latency and provide a synchronised experiance for all clients.
+\\
+\\
+Implementation goals:
+\begin{itemize}
+\item Implement a system that allows one client to act as a server for all others. Throughout this document, I will be refering to this as the \textbf{Client-Hosted} model.
+\item Implement a system for each client to send their updates to each other client directly. Throughout this document, I will be refering to this as the \textbf{Peer-to-Peer} model.
+\end{itemize}
+Data gathering goals:
+\begin{itemize}
+\item TODO
+\end{itemize}
+
+\newpage
+
 \section{Basic concepts and terminolory}
 First of all, I will define some basic concepts and terminolory that will be used throughout this document.
 \\
@@ -22,8 +40,28 @@ First of all, I will define some basic concepts and terminolory that will be use
 \\
 \textbf{Jitter:} TODO
 
+
+\newpage
 \section{Networking principles in games}
 TODO: talk a bit about UDP, TCP/IP and routing...
+
+\subsection{Communitaction Issues}
+
+In the dissertation \mycite{macedonia1995network}, the author has identified and grouped the most prevelent issues that occur in internet communications. In real time applications such as online games, these issues can be very impactful on the experience of the players.
+
+\subsubsection{Data Distribution}
+Broadcast to each client
+
+\subsubsection{Latency}
+Lag and Jitter
+
+\subsubsection{Reliability}
+UPD can lose packets........ The article \mycite{lincroft1999internet} documents the issues that the developed team encountered when developing the netcode for the 1997 game ``X-Wing vs. TIE fighter''. The author has experimented with TCP connections in game data transmission and found that ``TCP refuses to deliver any of the other packets in the stream while it waits for the next "in order" packet. This is why we would see latencies in the 5-second range.'' and ``if a packet is having a tough time getting to its destination, TCP will actually stop re-sending it! The theory is that if packets are being dropped that it's due to congestion.''. The features that have been implemented into TCP to make it reliable, end up negatively effecting real-time application data traffic and due to the volume of data to be transmitted, should not be used for time sensitive data.
+
+\subsubsection{Bandwidth}
+Consumer hardware and networking slow (esp upload)
+
+
 
 \subsection{The Centralised Server Model}
 Most online multiplayer games that are played today, make use of the ``centralised server model'' for sinchronising the simulation state between several clients participating in the same simulation. This means that in an example of a First Person Shooter (FPS), if one player presses the ``jump'' key, their character will jump and this information is would also be sent over to the game server. The server would then send the information that this player has jumped, to all other clients. There is a potential problem here however. Given that the ping between the server and client A is \(\alpha\) and between the server and client B is \(\beta\), the time between client A pressing an input and client B being notified of this input can not be less than $\alpha+\beta$ and due to the limitations of physics $\alpha>0$ and $\beta>0$. This means that at any given time the lag experianced between clients A and B will be more than $\alpha+\beta$ when processing times are factored in too. This leads to a problem of a poor experience for a client with a high ping to the server, as they will receive the updates from the server later than every other player and therefore be at a disadvantage if the game requires real time reactions. Unfortunately under some implementations, this also results in a poor experiance for every other player, who despite having resonable ping to the server, can be shot from behind cover by a laggy player who fired a shot before the cover was reached.
