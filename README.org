@@ -1,3 +1,0 @@
-#+Title: Peer-to-Peer_Game_Networking
-
-* TODO Complete README
