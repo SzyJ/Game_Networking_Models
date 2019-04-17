@@ -15,6 +15,10 @@ Next comes the transport layer where either UDP\footnote{UDP: User Datagram Prot
 The next layer of protocols is the Operating System Iterface or library, that is called by applications needing to share data using the above protocols. With Windows, a library called ``WinSock'' is often used, however other options are also available such as enet, asio, RakNet... This is where a programmer would be able to configure which protocols to use (Like TCP or UDP, IP or X.25 amongst many other configurable options).
 
 
+\subsection{Connecting the clients together}
+TODO: Tried UDP for connection. Big problems if packet is not delivered
+
+
 \subsection{Message Structure Startegies}
 
 \subsubsection{Data Representation}
