@@ -16,13 +16,44 @@ The next layer of protocols is the Operating System Iterface or library, that is
 
 
 \subsection{Connecting the clients together}
-TODO: Tried UDP for connection. Big problems if packet is not delivered
+When connecting multiple clients together, no matter what model is uesd, the session host or the server will need to know what clients will participate in this game session. A brute force solution to this would be to hard code all the information that is needed by each of the participating parties. This solution presents many flaws however. The configuration on each client would have to be configured before the first run on each new participant, as well as when a different connection pattern is wanted. While this solution would be simplest, the issues associated with connecting new clients and synchronising multiple configuration files for the syetem to work together, make this infeasable.
+A common solution used in the industry is to use something known as a matchmaking server. This is a seperate server with a publicly known IP address, that would be tasked with listening in for join messages from clients and finding the best matches of players based on many different factors such as ping to the game server or player skill. The information about each client would then be passed onto the game server for the processing to start. The matchmaking idea provides many advantages including taking away the computation associated with connecting from the main gameplay server however when developing a networking solution without a central server, this defeats the point.
+The most appropriate solution that I have found, combines both ideas. Firstly, there will need to be a way for the user to define what the address of the server or session host peer is. This can be done through a configuration file or getting an input from the user. With the server address known, each client can send a message to that address requesting to join a game. The client receiveing this information, would essentially act as a matchmaking server and after getting requests to join from enough players, the game could start.
+
+\subsubsection{Design of the matchmaking server}
+While the basic need for operation of the matchmaking server is slightly different for client hosted and Peer to Peer models, they will also share a lot of logic and functionality. Below is the basic flow of operation for this server.
+\begin{enumerate}
+\item Initialise Networking Library with predefined, known port
+\item Listen for ``Join Request'' messages on the port from clients.
+\item If the client is allowed to join the game, reply with ``Join Acknowledgement'' message.
+\item \begin{enumerate}
+  \item If the client is a P2P session host\\
+     Broadcast the information about each client to each client.
+
+  \item If the client is a CH session host\\
+     Send the information about each client to the game server.
+  \end{enumerate}
+\end{enumerate}
+
+I have experimented with different approaches for implementing this flow. Initially, for simplicity, the implementation consisted only of UDP messages being sent between clients. This means that only one UDP port had to be opened and therefore the same port that is used for the connection logic, would be used for the communication with the game server. After inspecting the solution, I have found that due to the nature of UDP messages, some aspects of this implementation could be volotile and leave the program in a unexpected state. If a ``Join Request'' message was not delivered, no acknowledgement message would be received and therefore a timeout waiting system would have to be implemented to resend the join message or the system would be waiting for an acknowledgement for ever. A larger issue could arise however, if the acknowledgement message is not delivered. When the server receives the join message, this client would be added to the server's memory and therefore it would be assumed that the player would be in the game. However, if the player is still waiting for an acknowledgement and the game starts, this player would not know that they are actually in the game. To solve this issue, we could introduce an acknowledgement message for the acknowledgement however as these changes are being made, we are just fixing the intrinsic unreliablity of the UDP protocol.
+The obvious solution to the issues that have been encountered here, is to use the TCP protocol which exists because it has already fixed the isses addressed here.
+The revised outcome of the architecture of the matchmaking server, would work in a similar way to the previous design but the TCP protocol would be used. This forces us to implement some changes to the messages that we are expecting to receive from the clients. Firstly, since the set of TCP ports and UDP ports does not overlap (i.e. TCP port 4500 is a completely different port to UDP port 4500), the connection server will need to know what UDP port has been opened by each client. This means that alongside the Join Request message, the clients will need to send the port that the game server will use to send messages. We can still use the source address of the message to know the IP address. With the TCP protocol guaraneeing that no messages are dropped, we can safely assume that each client will get all the information from the server and all clients can proceed to the game loop together. As a result of implementing a TCP server connection, this now means that each client will also have to implement logic for connecting to the server with TCP.
+Overall, this is a much better solution to the original design as the code for the game logic and connection logic, is more logically organised in seperate classes.
 
 
-\subsection{Message Structure Startegies}
+\subsection{Main Game loop and Broadcasting}
+Real time appplicatios using the UDP protocol,
+
+The book \mycite{smed2002review} says ....
+
+
+\subsection{Message Structure Strategies}
 
 \subsubsection{Data Representation}
-There are many different ways that the same data can be represented and each one is carefully designed to be the most appropriate for it's use. Consider the two figures below of common ways of goruping complex data in an ``easily readable'' format; XML in Figure \ref{fig:xml-example} and JSON in Figure \ref{fig:json-example}. These example have been adapted from the article \mycite{fiedler2016packets}.
+Depening on the complexity of the game and the amount players participating in the same game instance, it is likely that a large amount of data has to be sent many times from within the main game loop. The data will be transmitted over the internet as a series of bytes and will have to be understood and put together again at the recipient's end. One of the challenges of designing a networking, real-time application, is working around the idea that for any packet sent with UDP, there is no guarantee that it will arrive.
+
+
+There are many different ways that the same data can be represented and each one is carefully designed to be the most appropriate for it's use. Consider the two figures below of common ways of grouping complex data in an ``easily readable'' format; XML in Figure \ref{fig:xml-example} and JSON in Figure \ref{fig:json-example}. These example have been adapted from the article \mycite{fiedler2016packets}.
 
 \newpage
 \begin{figure}[!ht]
