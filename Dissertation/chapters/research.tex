@@ -4,7 +4,7 @@ Throughout this chapter, I will be investigating how networking is implemented i
 \section{Networking implementations in games}
 TODO:
 
-\subsection{Variable ping system in Battelfield 1}
+\subsection{Variable ping system in Battlefield 1}
 An interesting approach to the issue of variable ping in a game has been implemented by DICE in the game Battelfield 1. Given 2 players; player A with a low ping to the server and player B with a ping of <150ms to the server.
 
 When player B fires at a moving player A, player B's client will perform the check concluding that player A has been hit and this information is sent to the server. The server will then perform it's own checks and if the server agrees that this hit is possible, then it sends the hit confirmation to player B and damage information to player A. This approach is called Clientside-Server Authoritative as while the hit registration is calculated on clientside, the server must still confirm that this is valid.
