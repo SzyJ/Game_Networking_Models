@@ -5,7 +5,7 @@
 Test for inline: \lstinline{test Hello;}
 
 \section{Protocols}
-During any connection that can be deployed between several processes on a machine or even different physical hardware in seperate geographical locaitons, many different protocols come into play.
+During any connection that can be deployed between several processes on a machine or even different physical hardware in seperate geographical locaitons, many different protocols come into play. In this section, I will investigate the different methods of transferring data over the Internet and discuss the choices that have to be made in the design of my own protocol to allow for different clients connecting to eachother and sending data.
 
 \subsection{Protocols in Network Communications}
 Firstly, in the network layer, most commonly the IP\footnote{IP: Internet Protocol} is employed however other options such as X.25 are also available but have more niche uses. These protocols are responsible for ``packaging'' the data to be sent between two different computers identified by their IP address. The packet from the sending machine, will travel through a network of routers that will eventually lead it to the machine with the IP address of the recieving machine.
@@ -42,9 +42,18 @@ Overall, this is a much better solution to the original design as the code for t
 
 
 \subsection{Main Game loop and Broadcasting}
-Real time appplicatios using the UDP protocol,
+The paper \mycite{smed2002review} discusses the topic of ``dead reckoning'' in detail. This is the idea of estimating what value is likely to be received from the server in the next packet by evaluating the previous values. In an example of an entity moving through a Virtual Environment at a constant speed in a constant direction and given that the position of this entity is being broadcasted from a game server, the game client can predict that if the previous packets have updated the position of this entity by the same amount every time, it can calculate the next value that will be received before the packet even arrives. This information can be used to interpolate the position of this entity between the packet that has just arrived and what poition it is expected to be in after the next packet arrives, thus giving the client a more smooth simulation. This also makes the smoothness of the simulation less reliant on network quality, though with low quality networking, the issue of ``rubber banding''\footnote{Rubber Banding is when a client sees an object in a simulation in a certain location but after a update of where this object should be arrives from an authority (server), this position is instantly updated to this new, correct position. From the client's point of view, this looks like the entity has teleported to the new location.} can become prevelent. Even though the implementation of such a system is out of scope of this project, the way the packets are sent from a server to the clients, can make a process like this easier.
 
-The book \mycite{smed2002review} says ....
+The most common implementation for how servers broadcast data from the server to clients in AAA games, is to broadcast all necessary update data at a constant rate many times a second. If a packet is not delivered to one of the clients, there is no need to resend it since a new updated packet will be sent right after the last one. The constant rate at which the packets are sent and the idea that the same amout of time in-game time has passed between each consecutive packet that is received, makes startegies such as dead reckoning easier to implement than is the updates were sent irregularily.
+
+\subsubsection{Update rates}
+When updates are sent to clients over a network, the latency between two machines introduces the physical limitation of the lowest possible time between an action happening on one client and that action being represented on another client somewhere else on the network. This limitation cannot be broken due to the laws of physics and how the information is transmitted through the wires in a network. What makes this delay even larger, is the transmission or update rates of the data from the server to it's clients and vice-versa. When the server broadcasts data 30 times per second, it can be said that it is broadcasting at 30Hz, making the delay between each update roughly 33.33ms. This means that if the server is broadcasting at 60Hz, the delay between a client sending data and another client receiving data should be lower than if the server is broadcasting at 30Hz.
+
+In some fast paced games, the update rate of the server can have a large effect on the gameplay, especially in competative scenarios. In many FPS games such as Call of Duty, the gameplay uses guns that fire many times a second. Given an example of a server broadcasing at an update rate of 10Hz and a player using a gun that fires at a rate of 600 RPM (rounds per minute), the time between a player firing two bullets and the time difference between the server sending two updates, is both 100ms. This means that each packet that the server sends will contain information about one bullet. In the same scenario, given that the player is firing a weapon with 750RPM, the delay between two bullets being fired is 80ms. This means that the server will have to send packets that contain up to two bullets. From the point of view of another player that is receiving the damage, it will seem as if one bullet from the gun could deal more damage than another bullet. This is often referenced to as ``super bullets''. This issue can be solved by increasing the update rate of the server which would also cause packet loss to be less impactful due to the amount of packets that would be received every second.
+
+\subsubsection{Tick rates and simulation steps}
+
+
 
 
 \subsection{Message Structure Strategies}
@@ -111,8 +120,13 @@ There are many different ways that the same data can be represented and each one
 \newpage
 
 
-\subsubsection{Checking for Packet Loss in connection}
+\subsubsection{Detecting and Dealing with Packet Loss}
 The packet information could contain a certain amount of bits that would be incremented with each simulation step\footnote{A simulation step refers to a state of values that represent the current state of a simulation. Each time the values are updated, is a new simulation step. This is often done and broadcasted several times a second in central server models.}. This counter value could loop round when a maximum value is reached as long as several simulation steps in a row have unique values. The receiver could evaluate this value when received, checking if a packet has been dropped since the last received update. Knowledge about the quality of the connection could be important information when determining how much of the simulation has to be estimated between the received updates and could also be vital information to the player when in a game demanding split-second reaction time allowing them to change their strategy with the knowledge that they may be at a dissadvantage against other players.
+
+TODO: Find source where I read this...
+each update packet can also contain a copy of the previous packet attached to it so that even if packet loss occurs, the simulation can stay up to date.
+
+
 
 
 

@@ -1,9 +1,8 @@
 \chapter{Research}
 TODO:
 
-\section{Existing networking implementations}
+\section{Networking implementations in games}
 TODO:
-
 
 \subsection{Variable ping system in Battelfield 1}
 An interesting approach to the issue of variable ping in a game has been implemented by DICE in the game Battelfield 1. Given 2 players; player A with a low ping to the server and player B with a ping of <150ms to the server.
@@ -21,6 +20,20 @@ Apex Legends is a ``Battle Royale'' game by Respawn Entertainment. Due to the ge
 Since transferring all the information about 60 different players would most likely exceed the average MTU of a UDP packet, with each update, the server sends 1 smaller packet per each player to each player. This means that when 60 players are in the game, 60 packets are sent to 60 different clients from the same server. This is shown in the Netcode analysis in \mycite{bns2019apex}.
 
 An interesting outcome of this, is quite noticible network lag that slowly goes away, as less and less players remain in the game. It is also likely due to this, that Respawn felt the need to implement a ``Client Authoritative'' aiming model. Meaning that the server will favor what the client sees over it's own view of the simulation (i.e. If the client claims that a shot has hit an enemy, the server is likely to agree). The choise for this implementation could have been made to fix two potential issues; reducing the load on the server by reducing the need to perform extencive checks for each shot (this could be significant if a lot of players are playing), making the game feel more responsive on slower client hardware that may need more time to process up to 60 packets that arrive from the server at each update tick.
+
+\section{Other networking developement tools}
+TODO:
+
+\subsection{Unity's UNET}
+Allows for easy implementation of Client Hosted model in Unity. Hard to get working like I wanted.
+
+
+\subsection{Photon Network in Unity}
+Similar to UNET, allows for easy and free server sental for central server model
+
+
+\subsection{Google's Stadia}
+Allows for easy networking since it's already on server
 
 
 \section{Security}
