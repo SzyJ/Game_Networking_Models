@@ -1,5 +1,5 @@
 \chapter{Research}
-Throughout this chapter, I will be investigating how networking is implemented in popular modern AAA games. I will also implement a simple online, multiplayer demo game using different ways of implementing networking in the Unity game engine. The experiance of using the options that exist in Unity for network game developement, will be similar to what I will aim to implement at a much lower level with my networking template.
+Throughout this chapter, I will be investigating how networking is implemented in popular modern AAA games. I will also implement a simple online, multiplayer demo game using different ways of implementing networking in the Unity game engine. The experience of using the options that exist in Unity for network game developement, will be similar to what I will aim to implement at a much lower level with my networking template.
 
 \section{Networking implementations in games}
 TODO:
@@ -21,6 +21,20 @@ Since transferring all the information about 60 different players would most lik
 
 An interesting outcome of this, is quite noticible network lag that slowly goes away, as less and less players remain in the game. It is also likely due to this, that Respawn felt the need to implement a ``Client Authoritative'' aiming model. Meaning that the server will favor what the client sees over it's own view of the simulation (i.e. If the client claims that a shot has hit an enemy, the server is likely to agree). The choise for this implementation could have been made to fix two potential issues; reducing the load on the server by reducing the need to perform extencive checks for each shot (this could be significant if a lot of players are playing), making the game feel more responsive on slower client hardware that may need more time to process up to 60 packets that arrive from the server at each update tick.
 
+\subsection{Destiny 2's uniquely complicated netcode}
+In 2015, a Bungie developer gave an interseting talk at GDC (Game Developer's Conference): \mycite{truman2015destiny2}. The game Destiny 2, has decided to use the peer to peer model to create an ``always online'' world that players could join and leave freely. This resulted in a netcode that was refered to by \author{truman2015destiny2} as having a  ``uniquely complicated network topology''. In a previous Bungie game with multiplayer networking, Halo Reach,  a mixture of a peer to peer model and client hosted model has been used in multiplayer matches. Each player would send information such as weapon fire or movement to all other players but there would also be a physics server running on one of the clients in the simulation. The matches were designed to be relatively short and players where incentivised to remain in the game until the end of each match. This meant that if the player running the physics server were to leave, the gameplay flow would have to be interrupted for all other players as the host migration system allocated a new player to run this server. Fortunately, due to the nature of the game, this happened rarely as players were incentivised to remain till the end of the match. In Destiny 2 however, there are many zones (refered to in the talk as ``bubbles'') that a players would often join and leave as they move around the environment. This made host migrations much more common and would happen roughly ``every 160 seconds''. This has prompted Bungie to abandon the client hosted physics server aspect of Destiny 2's netcode and move towards renting cloud server space to host the physics engine. In ``private bubbles'', however, it became inefficient to communicate with a central server for game physics calls so the old system was used there. In summary, Destiny 2 uses peer to peer in order to send packets directly to other players to make the gameplay feel more responsive than sending messags to the server and then a client but has fixed some issues that the game could have if it was fully peer to peer by implementing elements that use client hosted and central server models too.
+
+\begin{figure}[!h]
+  \centering
+  \includegraphics[width=0.5\textwidth]{Destiny2_networking}
+  \caption{Example of how netcode is designed in Destiny 2. Image from the GDC talk: \mycite{truman2015destiny2}}
+  \label{fig:destiny2netcode}
+\end{figure}
+
+\subsubsection{Issues with the peer to peer system}
+
+
+\newpage
 \section{Other networking developement tools}
 TODO:
 
