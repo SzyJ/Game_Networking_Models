@@ -61,6 +61,10 @@ UPD can lose packets........ The article \mycite{lincroft1999internet} documents
 \subsubsection{Bandwidth}
 Consumer hardware and networking slow (esp upload)
 
+\newpage
+\section{Networking Model Options}
+TODO; dev have choice. all have positives and negatives.
+
 
 \subsection{The Centralised Server Model}
 Most AAA online multiplayer games that are played today, make use of the ``centralised server model'' for synchronising the simulation state between several clients participating in the same simulation. This means that in an example of a First Person Shooter (FPS), if one player presses the ``jump'' key, their character will jump and this information is would also be sent over to the game server. The server would then send the information that this player has jumped, to all other clients. There is a potential problem here however. Given that the ping between the server and client A is \(\alpha\) and between the server and client B is \(\beta\), the time between client A pressing an input and client B being notified of this input can not be less than $\alpha+\beta$ and due to the limitations of physics $\alpha>0$ and $\beta>0$. This means that at any given time the lag experienced between clients A and B will be more than $\alpha+\beta$ when processing times are factored in too. This leads to a problem of a poor experience for a client with a high ping to the server, as they will receive the updates from the server later than every other player and therefore be at a disadvantage if the game requires real time reactions. Unfortunately under some implementations, this also results in a poor experience for every other player, who despite having resonable ping to the server, can be shot from behind cover by a laggy player who fired a shot before the cover was reached.
@@ -70,3 +74,11 @@ There are many different possible reasons for the lag to the server to vary wide
 
 \subsubsection{Possible solutions to the variable ping problem}
 Netcode developers of the most popular games, have tried many different solutions to fix or at least mitigate the issue of widely differing ping to the game server between players. One example of a solution here could be ``region locking''. This is the idea that only players with equally low ping, can connect to the same game instance on a server. This could be done by providing game servers spread out across as many geographical regions as possible and only allow players to connect to their local one. This presents two main issues however. Firstly, this prevents players in different geographical regions from playing together and therefore serperates the community. Also, the issue of players in remote areas playing together and having a suboptimal experience due to the server lag, has not been addressed. The developers of Battlefield 1 have implemented an interesting solution to this problem and I will talk about this further on.
+
+
+\subsection{Client Hosted Model}
+TODO
+
+
+\subsection{Peer to Peer Model}
+TODO
