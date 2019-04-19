@@ -46,14 +46,15 @@ First of all, I will define some basic concepts and terminolory that will be use
 TODO: talk a bit about UDP, TCP/IP and routing...
 
 \subsection{Communitaction Issues}
-
 In the dissertation \mycite{macedonia1995network}, the author has identified and grouped the most prevelent issues that occur in internet communications. In real time applications such as online games, these issues can be very impactful on the experience of the players.
 
 \subsubsection{Data Distribution}
 Broadcast to each client
 
 \subsubsection{Latency}
-Lag and Jitter
+The paper \mycite{bettner20011500}, documents the architecture and implementation of networking approaches in the RTS (Real Time Startegy) games ``Age of Empires'' 1 and 2. The authors talk about an experiment that has been performed with the game netcode where players were interviewed on whether they felt that their game inputs felt responsive at differnet latencies between the players. They have found that when playing with a latency of 250ms or less, the latency was not noticible at all. Latencies between 250ms and 500ms were ``very playable''. Anything more than 500ms would start becoming noticible however. They have also found that when playing with a noticible latency, the players have naturally developed a ``mental expectation of the lag'' between the inputs and an action happening. After developing this ``game pace'', they would enjoy playing the game at a consistent slower response than altering between slow and fast letency.
+
+What can be seen in this example, is that while making the latency between inputs and actions, does make the game more responsive and fun, noticible jitter when receiving messages can also impact the player's experiance in significant ways.
 
 
 \subsubsection{Reliability}
