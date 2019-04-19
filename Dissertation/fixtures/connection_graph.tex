@@ -8,11 +8,10 @@
     \newthread{server}{Server}{}
     \newinst{conn_serv}{Connection Server}{}
 
-
     \begin{sdblock}{Connection Protocol}{}
-      \begin{call}{client}{connectToServer()}{client}{}
-        \prelevel
-        \begin{call}{server}{startConnectionServer()}{server}{}
+      \prelevel
+      \begin{call}{server}{startConnectionServer()}{server}{}
+        \begin{call}{client}{connectToServer()}{client}{}
           \postlevel
           \begin{call}{client}{initialiseWinsock()}{game_cli}{UDP\_Port}
           \end{call}
@@ -40,8 +39,7 @@
             \prelevel
           \end{call}
 
-
-          \begin{sdblock}{For P2P connection}{}
+          \begin{sdblock}{Only for P2P connection}{}
             \begin{call}{client}{listenForPeerInfo()}{conn_cli}{}
               \prelevel
               \begin{call}{server}{broadcastPeerInfo()}{conn_serv}{}
@@ -49,15 +47,17 @@
                 \mess{conn_serv}{...Repeat for each...}{conn_cli}
               \end{call}
               \prelevel
-          \end{call}
-        \end{sdblock}
-      \end{call}
-      \prelevel
+            \end{call}
+          \end{sdblock}
+        \end{call}
+
+        \begin{call}{server}{getClientList()}{conn_serv}{clients}
+        \end{call}
       \end{call}
     \end{sdblock}
 
   \end{sequencediagram}
 
   \caption{Graph showing the protocol of any client connecting to a hosting client.}
-  \label{fig:client-protocol}
+  \label{fig:connection_graph}
 \end{figure}

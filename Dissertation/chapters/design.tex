@@ -127,8 +127,7 @@ There are many different ways that the same data can be represented and each one
 \subsubsection{Detecting and Dealing with Packet Loss}
 The packet information could contain a certain amount of bits that would be incremented with each simulation step\footnote{A simulation step refers to a state of values that represent the current state of a simulation. Each time the values are updated, is a new simulation step. This is often done and broadcasted several times a second in central server models.}. This counter value could loop round when a maximum value is reached as long as several simulation steps in a row have unique values. The receiver could evaluate this value when received, checking if a packet has been dropped since the last received update. Knowledge about the quality of the connection could be important information when determining how much of the simulation has to be estimated between the received updates and could also be vital information to the player when in a game demanding split-second reaction time allowing them to change their strategy with the knowledge that they may be at a dissadvantage against other players.
 
-TODO: Find source where I read this...
-each update packet can also contain a copy of the previous packet attached to it so that even if packet loss occurs, the simulation can stay up to date.
+The article \mycite{lincroft1999internet}, documents some of the problems that were encountered in the developement of the ``X-Wing vs. TIE Fighter'' game. The team realised that dropped packets had a significant negative inpact on the game so to counter this, they have implemented a system to resend packets that didn't arrive. This system has initially fixed the issue however in some cases, even the resent packets were getting dropped which coused spikes in bandwidth usage. A solution that they have come up with is that each update packet would also contain a copy of the previous packet attached. This way, even if packet loss occurs, the simulation can stay up to date as long as two or more packets dont get dropped in a row. This solution is quite elegant as Lincroft warns that ``if you are using UDP, you shouldn’t send small packets'', as the headers of UDP packets do not get as compressed as that of TCP packets therefore its more efficient to make use of as many bytes as possible when constructing UDP packets. The solution of including the previous packet data with the current one makes use of this, otherwise wasted, space and could also act as a checksum for the data in the previous packet.
 
 \newpage
 
@@ -151,7 +150,7 @@ Understanding message code descriptions:
 \subsection{Establishing connection}
 TODO write how code can be reused
 
-%fig:client-protocol
+%fig:connection_graph
 \input{fixtures/connection_graph}
 
 \newpage
@@ -187,7 +186,6 @@ TODO write how code can be reused
   \caption{Process of client connecting to server}
   \label{code:client_conn}
 \end{figure}
-
 
 \newpage
 \subsubsection{Interface for the peer to peer model}
@@ -228,6 +226,10 @@ TODO write how code can be reused
 
 \subsection{Client and Server communication}
 TODO used in client hosted. Host client sends to server just like any other, just destination is localhost.
+
+
+%fig:client_hosted_graph
+\input{fixtures/client_hosted_graph}
 
 
 

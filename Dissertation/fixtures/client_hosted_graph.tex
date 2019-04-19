@@ -1,57 +1,45 @@
 \begin{figure}[h]
-
   \centering
   \begin{sequencediagram}
     \newthread{client}{Client}{}
-    \newinst{server-lsn}{Server Listener}{}
-    \newinst{key-lsn}{Keyboard Listener}{}
+    \newinst[1]{game_cli}{Game Client}{}
     \newthread{server}{Server}{}
+    \newinst[3]{game_serv}{Game Server}{}
 
-    \begin{sdblock}{Connection - TCP protocol}{}
-
-      \begin{call}{server}{openToClientConnection()}{server}{\textit{Once all clients connect...}}
+    \begin{sdblock}{Data Sync Protocol}{}
+      \prelevel
+      \begin{call}{server}{startGameServer()}{server}{}
         \postlevel
-        \postlevel
-        \postlevel
-        \postlevel
-      \end{call}
+        \begin{call}{server}{initialiseWinsock()}{game_serv}{}
+        \end{call}
 
-      \prelevel \prelevel \prelevel
-      \prelevel \prelevel
-      \mess{client}{JR[UDP Port to use]}{server}
-      \begin{call}{client}{listenForServerMsg()}{client}{}
-        \mess{server}{JA<ID>}{client}
-      \end{call}
+        \begin{call}{server}{setClientList(clients)}{game_serv}{}
+        \end{call}
+        \prelevel
+        \begin{call}{client}{startGameClient()}{client}{}
+          \postlevel
+          \begin{call}{client}{startClient()}{game_cli}{}
+            \prelevel
+            \begin{call}{server}{startServer()}{game_serv}{}
+
+              \begin{sdblock}{Game Loop}{}
+                \mess{game_cli}{UP<ID><VAL>}{game_serv}
+                \mess{game_serv}{CS<ID><VAL>...}{game_cli}
+              \end{sdblock}
+            \end{call}
+            \prelevel
+          \end{call}
 
 
-      \begin{call}{client}{listenForServerMsg()}{client}{}
-        \mess{server}{DE[<ID><VAL>...]}{client}
+
+
+        \end{call}
+        \prelevel
       \end{call}
     \end{sdblock}
 
-    \begin{sdblock}{Update Loop - UDP protocol}{}
-
-      \begin{call}{server}{startUpdateLoop()}{server}{\textit{simulation finished}}
-        \postlevel \postlevel \postlevel
-        \postlevel \postlevel \postlevel
-      \end{call}
-      \prelevel \prelevel \prelevel
-      \prelevel \prelevel \prelevel
-
-
-      \begin{call}{client}{startServerListen()}{server-lsn}{\textit{loop}}
-        \mess{server}{CS< <ID><VAL> ... >}{server-lsn}
-        \postlevel \postlevel \postlevel
-      \end{call}
-
-      \prelevel \prelevel \prelevel
-      \begin{call}{client}{startKeyboardListen()}{key-lsn}{}
-        \mess{key-lsn}{UP<VAL>}{server}
-      \end{call}
-
-    \end{sdblock}
   \end{sequencediagram}
 
-  \caption{Graph showing the protocol of joining a session hosted on the server as well as sending and receiving updates.}
-  \label{fig:client-protocol}
+  \caption{Graph showing the protocol sending and receving updates with the client hosted model.}
+  \label{fig:client-protocol_hosted_graph}
 \end{figure}
