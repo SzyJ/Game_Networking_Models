@@ -130,31 +130,108 @@ The packet information could contain a certain amount of bits that would be incr
 TODO: Find source where I read this...
 each update packet can also contain a copy of the previous packet attached to it so that even if packet loss occurs, the simulation can stay up to date.
 
-
-
-
-
 \newpage
 
-%fig:client-protocol
-\input{fixtures/client-protocol-graph}
+\section{Message Code Design}
+Whenever a message is received, the first two bytes will determine the type of this received message. Any unique action to be performed, should have a unique message code associated with it so that it is easy to tell what action needs to be performed after just reading the two byte identifier. If more information needs to be sent along with the message code, this information can be concatenated to the message code byte by byte. The meaning of each byte after the message code will be defined by the message code. The table \ref{table:message-codes} below, contains code descriptions of all possible messages that can be sent and received by my tool.
 
-\subsection{Potential issues with the Client Hosted protocol}
-The protocol for establishing a connection and transfering of data can be found in Figure \ref{fig:client-protocol}. There are many potential flaws with this approach.
-\subsubsection{Packet Loss}
-Time outs in place in case response lost...
-resend....
-Resend request if no response....
-
-
-\subsubsection{Security}
-anyone could send update by spoofing ip
-
-
-\pagebreak
-\section{Message Codes}
+Understanding message code descriptions:
+\begin{itemize}
+\item The angle brackts (\lstinline{<>}) will represent one byte of information (e.g. \lstinline{<ID>} signifies one byte number that represents the ID).
+\item The square brackets (\lstinline{[...]}) signify a sequence of undefined length with the pattern that is defined inside them (e.g. \lstinline{[<CHAR>...]} signifies that the rest of the message contains a series of charactes each represented as a char(signed byte)).
+\end{itemize}
+\vfill
 
 %table:message-codes
 \input{fixtures/message-code-table}
+\newpage
 
-\pagebreak
+\section{Protocol Flow}
+
+\subsection{Establishing connection}
+TODO write how code can be reused
+
+%fig:client-protocol
+\input{fixtures/connection_graph}
+
+\newpage
+\subsubsection{Interface for the client hosted model}
+
+\begin{figure}[!h]
+  \centering
+  \begin{lstlisting}
+      GNAT::Server* server = new GNAT::Server();
+
+      int successful = 0;
+      successful = server->startConnectionServer();
+      if (!successful) {
+        // Log and abort
+      }
+  \end{lstlisting}
+  \caption{Process of opening server to client connections}
+  \label{code:server_conn}
+\end{figure}
+
+\begin{figure}[!h]
+  \centering
+  \begin{lstlisting}
+      GNAT::Client* client = new GNAT::Client();
+
+      int successful = 0;
+      // Server Details already configured
+      successful = client->connectToServer();
+      if (!successful) {
+        // Log and abort
+      }
+  \end{lstlisting}
+  \caption{Process of client connecting to server}
+  \label{code:client_conn}
+\end{figure}
+
+
+\newpage
+\subsubsection{Interface for the peer to peer model}
+
+\begin{figure}[!h]
+  \centering
+  \begin{lstlisting}
+      GNAT::Peer* peer = new GNAT::Peer();
+
+      int successful = 0;
+      successful = peer->openAsSessionHost();
+      if (!successful) {
+        // Log and abort
+      }
+  \end{lstlisting}
+  \caption{Process of opening a peer up to connections from other peers}
+  \label{code:peer_conn_host}
+\end{figure}
+
+
+\begin{figure}[!h]
+  \centering
+  \begin{lstlisting}
+      GNAT::Peer* peer = new GNAT::Peer();
+
+      int successful = 0;
+      // Session Host Details already configured
+      successful = peer->connectToSessionHost();
+      if (!successful) {
+        // Log and abort
+      }
+  \end{lstlisting}
+  \caption{Process for a peer connecting to peer session host}
+  \label{code:peer_conn_join}
+\end{figure}
+
+\newpage
+
+\subsection{Client and Server communication}
+TODO used in client hosted. Host client sends to server just like any other, just destination is localhost.
+
+
+
+
+
+\subsection{Peer to Peer data broadcasting}
+TODO similar to client and server but sends multiple messages instead of one.

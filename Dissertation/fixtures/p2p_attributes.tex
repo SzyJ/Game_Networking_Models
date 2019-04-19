@@ -1,11 +1,21 @@
 \begin{figure}[!h]
   \begin{tabular}{ c p{0.94\textwidth} }
-    \faCheckCircle & Test good \\
+    \faCheckCircle & There are no additional costs to the publisher/developer when releasing the game. \\
+    \faCheckCircle & Players in remote locations can play together with low latency. \\
+    \faCheckCircle & There is no concept of host advantage, like what is present with the client hosted model. \\
+    \faCheckCircle & Host migrations are not a large problem since everyone has the full simulation state. \\
     \  & \  \\
-    \faMinusCircle & Test attribute \\
+    \faMinusCircle & Each client communicates directly with other clients making their connection as efficient as possible in theory. \\
+    \faMinusCircle & Even though a central ``authority'' is not needed, one of the peers often has to act as a session host to handle invitations and handshakes. \\
+    \faMinusCircle & Every client runs it's own simulation and is tasked with keeping it updated with everyone else's. \\
     \  & \  \\
-    \faTimesCircle & Test bad
-  \end{tabular}
+    \faTimesCircle & The lack of a central authority (such as a game server) makes cheat prevention difficult. \\
+    \faTimesCircle & Each player in an instance, can see the IP address of every other player they are playing with. \\
+    \faTimesCircle & Interacting with two different peers with different latencies, will feel inconsistant for the player.  \\
+    \faTimesCircle & Very high bandwidth usage compared to other models. \\
+    \faTimesCircle & The amount of update messages that need to be sent, increases as the number of players grows. \\
+    \faTimesCircle & A player with a poor internet connection or underpowered hardware, will make the game feel less responsive to other players. \\
+   \end{tabular}
   \caption{The attributes of the peer to peer model}
     \label{fig:p2p_attributes}
 \end{figure}

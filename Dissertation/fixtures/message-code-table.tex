@@ -1,46 +1,39 @@
-\begin{table}[!h]
+\begin{table}[p]
   \centering
-  \begin{tabular}{ l l p{0.3\textwidth} l }
+  \begin{tabular}{ l l p{0.44\textwidth}}
     \toprule
-    Message Type & Message Code & Description & Example Payload \\
+    Message Type & Message Code & Description \\
     \midrule
     Join Request &
-      \lstinline[]$JR$ &
-      Allows a client to send a join request to the server. &
-      \lstinline[]$JR$ \\
+      \lstinline[]$JR[<NUM_CHAR>...]$ &
+      Allows a client to send a join request to the server. Up to 5 number chars expected after the message, signifying the UDP port opened for game data. \\
     \addlinespace[10pt]
     Join Acknowledgement &
-      \lstinline[]$JA$ &
-      Allows the server to confirm that the client's information has been saved. Is followed by 1 byte indicating the client's ID &
-      \lstinline[]$JA1$ \\
+      \lstinline[]$JA<ID>$ &
+      Allows the server to confirm that the client's information has been saved. Is followed by 1 byte indicating the client's ID. \\
     \addlinespace[10pt]
     Ping Request &
       \lstinline[]$PQ$ &
-      Message instructing the recipiant to reply with \lstinline[]$PS$. Can be used to time the delay in this connection.&
-      \lstinline[]$PQ$ \\
+      Message instructing the recipiant to reply with \lstinline[]$PS$. Can be used to time the latency in a connection. \\
     \addlinespace[10pt]
     Ping Response &
       \lstinline[]$RS$ &
-      This should be sent whenever a \lstinline[]$PQ$ message is received. &
-      \lstinline[]$RS$ \\
+      This should be sent whenever a \lstinline[]$PQ$ message is received. \\
     \addlinespace[10pt]
     Update &
-      \lstinline[]$UP$ &
-      Used by a client to update it's value on the server. Is followed by 1 byte representing the new value. &
-      \lstinline[]$UP9$ \\
+      \lstinline[]$UP<ID><VAL>$ &
+      Used by a client to update it's value on the server. Is followed by 1 byte representing the ID of the client and 1 byte representing the new value. If the ID and the address don't match, the update is rejected. \\
     \addlinespace[10pt]
     Define &
-      \lstinline[]$DF$ &
-      Used by the server to define the initial values for each of the clients connected to this instance. It is followed by a non-zero, even amount of bytes representing the client ID and it's value pair. &
-      \lstinline[]$DF1020304050$ \\
+      \lstinline[]$DF<ID>[<CHAR>...]$ &
+      Used in the peer to peer model to broadcast client information to each client. It is followed by 1 byte representing this client's ID and a char array of undefined length of the format ``\lstinline[]$IP_ADDRESS:PORT$''. This char array is not terminated by the \lstinline[]$\0$ character. \\
     \addlinespace[10pt]
     Current State &
-      \lstinline[]$CS$ &
-      Used by the server to broadcast it's real state to all clients. When this is received, clients are expected to update their local state to this. It is followed by a non-zero, even amount of bytes representing the client ID and it's value pair. &
-      \lstinline[]$CS1927344157$ \\
+      \lstinline[]$CS[<ID><VAL>...]$ &
+      Used by the server to broadcast it's real state to all clients. When this is received, clients are expected to update their local state to this. It is followed by a non-zero, even amount of bytes representing the client ID and it's value pair. \\
 
     \bottomrule
   \end{tabular}
-  \caption{Table showing the message codes for distinguishing messages from each other and how each one is to be used}
+  \caption{Table showing the message codes for distinguishing messages from each other and how each one is expected to be used}
   \label{table:message-codes}
 \end{table}
