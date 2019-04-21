@@ -1,16 +1,12 @@
 \chapter{Design}
 
-\section{Code Architecture}
-
-Test for inline: \lstinline{test Hello;}
-
 \section{Protocols}
 During any connection that can be deployed between several processes on a machine or even different physical hardware in seperate geographical locaitons, many different protocols come into play. In this section, I will investigate the different methods of transferring data over the Internet and discuss the choices that have to be made in the design of my own protocol to allow for different clients connecting to eachother and sending data.
 
 \subsection{Protocols in Network Communications}
 Firstly, in the network layer, most commonly the IP\footnote{IP: Internet Protocol} is employed however other options such as X.25 are also available but have more niche uses. These protocols are responsible for ``packaging'' the data to be sent between two different computers identified by their IP address. The packet from the sending machine, will travel through a network of routers that will eventually lead it to the machine with the IP address of the recieving machine.
 
-Next comes the transport layer where either UDP\footnote{UDP: User Datagram Protocol} or TCP\footnote{TCP: Transfer Control Protocol}  can be chosen, both have different properties, advantages, disadvantages, useses and both are used in game networking. The UPD protocol is a simple, connectionless protocol which will simply send a packet from one IP address to another. Since each packet sent with UDP, can take a different route through the router network, there is no guarantee that the packets will be received in the same order as they were sent in. Due to many different reasons, packet loss can occur, meaning that it also cannot be guaranteed that every packet sent with UDP will arrive at the destination at all. Despite these dissadvantages and due to the simplicity of how this protocol was designed with it's connectionless nature, it inately has a major advantage in the speed that the packets can just be sent out and forgotten about. The TCP protocol, is built upon UDP to add some important features for reliable data sharing at a cost of speen and use in real-time applications. The most important property of TCP includes the assurance that if a packet is not received by a recipient, it is requested to be resent to guarantee that every pacet that is sent, is also recieved. This also means that the packets are aranged in the same order that they were sent meaning that we can be sure that not only data will arrive at the destination, but it will arrive just as we sent it. This implementation has many obvious benefits and in most scenarios, the delay of possibly re-sending a packet if it was not received is neglegible. In real-time applications however, this is likely to be an unnecessary waste of time and resources as even id a packet is dropped and and resent, by that time, new updated information is available so resending the dropped packet is useless when a packet with new information could be sent at that time instead. Simply, old information is quickly outdated and it's more important to send new information then old, non-useful information.
+Next comes the transport layer where either UDP\footnote{UDP: User Datagram Protocol} or TCP\footnote{TCP: Transfer Control Protocol}  can be chosen, both have different properties, advantages, disadvantages, useses and both are used in game networking. The UPD protocol is a simple, connectionless protocol which will simply send a packet from one IP address to another. Since each packet sent with UDP, can take a different route through the router network, there is no guarantee that the packets will be received in the same order as that in which they were sent in. Due to many different reasons, packet loss can also occur. This means that it cannot be guaranteed that a sent packet will even arrive at it's destination at all. Despite these dissadvantages and due to the simplicity of how this protocol was designed with it's connectionless nature, it inately has a major advantage in the speed at which the packets can just be sent out and forgotten about. The TCP protocol, is built upon UDP to add some important features for reliable data sharing at a cost of speed and use in real-time applications. The most important property of TCP includes the assurance that if a packet is not received by a recipient, it is requested to be resent to guarantee that every pacet that is sent, is also recieved. This also means that the packets are aranged in the same order that they were sent meaning that we can be sure that not only data will arrive at the destination, but it will arrive just as we sent it. This implementation has many obvious benefits and in most scenarios, the delay of possibly re-sending a packet, if it was not received, is neglegible. In real-time applications however, this is likely to be an unnecessary waste of time and resources as even if a packet is dropped, resending is likely to not be necessary as by that time, new updated information is available resending the dropped packet less importnat  when a packet with new information will be sent anyway. Simply, old information is quickly outdated and it's more important to send new information then old, non-useful information.
 
 The next layer of protocols is the operating system interface or library, that is called by applications needing to share data using the above protocols. With Windows, a library called ``WinSock'' is often used, however other options are also available such as enet, asio, RakNet... This is where a programmer would be able to configure which protocols to use (Like TCP or UDP, IP or X.25 amongst many other configurable options).
 
@@ -44,7 +40,7 @@ Overall, this is a much better solution to the original design as the code for t
 \subsection{Main Game loop and Broadcasting}
 The paper \mycite{smed2002review} discusses the topic of ``dead reckoning'' in detail. This is the idea of estimating what value is likely to be received from the server in the next packet by evaluating the previous values. In an example of an entity moving through a Virtual Environment at a constant speed in a constant direction and given that the position of this entity is being broadcasted from a game server, the game client can predict that if the previous packets have updated the position of this entity by the same amount every time, it can calculate the next value that will be received before the packet even arrives. This information can be used to interpolate the position of this entity between the packet that has just arrived and what poition it is expected to be in after the next packet arrives, thus giving the client a more smooth simulation. This also makes the smoothness of the simulation less reliant on network quality, though with low quality networking, the issue of ``rubber banding''\footnote{Rubber Banding is when a client sees an object in a simulation in a certain location but after a update of where this object should be arrives from an authority (server), this position is instantly updated to this new, correct position. From the client's point of view, this looks like the entity has teleported to the new location.} can become prevelent. Even though the implementation of such a system is out of scope of this project, the way the packets are sent from a server to the clients, can make a process like this easier.
 
-The most common implementation for how servers broadcast data from the server to clients in AAA games, is to broadcast all necessary update data at a constant rate many times a second. If a packet is not delivered to one of the clients, there is no need to resend it since a new updated packet will be sent right after the last one. The constant rate at which the packets are sent and the idea that the same amout of time in-game time has passed between each consecutive packet that is received, makes startegies such as dead reckoning easier to implement than is the updates were sent irregularily.
+The most common implementation for how servers broadcast data from the server to clients in AAA games, is to broadcast all necessary update data at a constant rate, many times a second. If a packet is not delivered to one of the clients, there is no need to resend it since a new updated packet will be sent right after the last one. The constant rate at which the packets are sent and the idea that the same amout of 'in-game' time has passed between each consecutive packet that is sent, makes startegies such as dead reckoning easier to implement than if the updates were sent irregularily.
 
 \subsubsection{Update rates}
 When updates are sent to clients over a network, the latency between two machines introduces the physical limitation of the lowest possible time between an action happening on one client and that action being represented on another client somewhere else on the network. This limitation cannot be broken due to the laws of physics and how the information is transmitted through the wires in a network. What makes this delay even larger, is the transmission or update rates of the data from the server to it's clients and vice-versa. When the server broadcasts data 30 times per second, it can be said that it is broadcasting at 30Hz, making the delay between each update roughly 33.33ms. This means that if the server is broadcasting at 60Hz, the delay between a client sending data and another client receiving data should be lower than if the server is broadcasting at 30Hz.
@@ -237,3 +233,39 @@ TODO used in client hosted. Host client sends to server just like any other, jus
 
 \subsection{Peer to Peer data broadcasting}
 TODO similar to client and server but sends multiple messages instead of one.
+
+
+
+\section{Implementation}
+
+Test for inline: \lstinline{test Hello;}
+
+
+\subsection{Tools and Technologies}
+
+\subsubsection{Why C++}
+Why c++
+
+
+\subsubsection{Why focus on Windows}
+Why focus on windows
+
+
+
+\subsubsection{Why the Winsock library}
+Why Winsock
+
+
+
+\subsection{Application Specifications}
+
+What should it do?
+
+What is out of scope?
+
+\subsection{Code Architecture}
+
+\subsubsection{Conceptual Application Flow}
+
+
+\subsection{Testing my implementation}
