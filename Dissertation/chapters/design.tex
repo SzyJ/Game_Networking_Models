@@ -235,33 +235,55 @@ TODO used in client hosted. Host client sends to server just like any other, jus
 TODO similar to client and server but sends multiple messages instead of one.
 
 
-
+\newpage
 \section{Implementation}
-
-Test for inline: \lstinline{test Hello;}
-
+I will be writing a simple implementation for the client hosted and peer to peer networking models in c++ using the Winsock library for networking. The goal with this project is to gain insight into how networking systems are implemented in real time applications and identify potential implementation pitfalls for such a system. Alongide the networking logic, I will write a console application that allows me to open several instances of itself to test message transporting between them. This console application will make use of my networking implementations and therefore allow me to easily test my networking functionality as I implement it.
 
 \subsection{Tools and Technologies}
+I have identified what technologies I want to use for this project. In this section, I will be analysing each one and provide alternatives that I could have used instead.
 
 \subsubsection{Why C++}
-Why c++
+There are many programming languages avaliable today, each with it's own strengths and weaknesses, each with a purpose that it was designed for. By nature, some langauges are more appropriate for some tasks over others and weighing out the pros and cons is important when making a decision of what language to use for a project.
+
+Historically, game developement has always fundamentally pushed the boundries of the most powerful hardware that is available at the time of developement. Nowdays, players can enjoy large, expansive virtual worlds with complex mechanics and realistic looking grapics. All these aspects of modern games, demand a large amout of computation that needs to be performed many times a second. The only way to do so much in little time is to make full use of any resources we can use, as efficiently as possible. Originally, the only real way of writing programs, was to manipulate memory locations directly. The management of memory has proved to be a difficult task for any larger scale project, and thus languages such as C and later C++ were born. They allowed us to more easily command the hardware and made programming much more accessable to more people. As time went on, new languages were introduced, that fundamentally did the same thing, but made tasks such as memory management much easier allowing people to quickly write programs and not worry about the intricasies of memory, processing and OS. This developement ended up being a double eadged sword however. Any improvement to ease of use, ended up having a performance cost. Languages such as Java, run in their own virtual machine allowing it to be easily portable to many different operating systems and hardware configurations. This however limits Java to not be able to access hardware resources, such as memory, as easily. The reason why C++, and C to a slightly lessed extent, to remain relevant through these changes in the industry, is that these languages run on the hardware itself rather than a virtual environment. The benefits of this include being able to easily access system memory which is essential when optimising code for performance. C++ has no built in garbage collection that is happening behind the scenes in code execution, the progammer controls which memory is being used and which can be released. The ``pay for what you use'' nature of C++ lets programmers use the processor power for their computation and not worry about anything else stealing it away.
+
+These are the main reasons why C++ is used in games and for the same reasons, it is a useful language for any action that has to happen in real time, such as game networking. If my library is written in C++, it would allow a game written in C++ to easily and natively integrate with it. Also, writing efficient packet payloads requires bit-level control and addressing memory locations with pointers, allows me to do this easily. A good networking library should run in the background of an application and not be noticed by the user, unless something goes wrong. The networking service should steal as little performance power from the main game as possible. This can be done with good C++ programming.
 
 
 \subsubsection{Why focus on Windows}
-Why focus on windows
+Most popular, modern games that are released in today's games industry, are only developed for Windows, there are several reasons for this operating system bias. Firstly, the production of a game is costly and the developement and QA testing on multiple platforms only increases this cost. The business decision for making the most profit, often comes down to developing for the largest userbase, which in this case is Windows. Microsoft has developed many tools, such as DirectX, to entice this behaviour further by making access to video and sound hardware resources easier which only accelerated this trend.
+For the same reason, if my intention for my application is to be useful for low-level game developement, it would be wise to target the windows platform.
 
+Another advantage of the Windows platform is the system manager that clearly display performance statistics such as CPU and RAM usage as well as the networking bandwidth used by each application.
 
 
 \subsubsection{Why the Winsock library}
 Why Winsock
 
 
+For my simple uses, doesnt really matter. Winsock has good documentation and a lot of examples allowing me to do quick developement.
+Winsock is based on the BSD sockets API, which is natively supported on both Linux and OS X.
+
 
 \subsection{Application Specifications}
+TODO
+\\
+\\
+What should the application be able to do?
+\begin{enumerate}
+\item Allow the developer using the library, to choose whether they wish to use the peer to peer model or the client hosted model.
+\item The tick rate of data broadcasting should be configurable.
+\item The only requirement to using the functionality is to clone the library in a known location. Only one import should be needed.
+\item Every public intreface should belong to the same namespace.
+\end{enumerate}
+The application will not:
+\begin{enumerate}
+\item Requirement
+\item Requirement
+\item Requirement
+\item Requirement
+\end{enumerate}
 
-What should it do?
-
-What is out of scope?
 
 \subsection{Code Architecture}
 
