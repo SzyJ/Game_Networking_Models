@@ -1,57 +1,39 @@
 \begin{figure}[h]
-
   \centering
   \begin{sequencediagram}
-    \newthread{client}{Client}{}
-    \newinst{server-lsn}{Server Listener}{}
-    \newinst{key-lsn}{Keyboard Listener}{}
-    \newthread{server}{Server}{}
+    \newthread{client}{Peer 1}{}
+    \newinst[3]{game_cli}{Game Peer}{}
+    \newthread{server}{Peer 2}{}
+    \newinst[3]{game_serv}{Game Peer}{}
 
-    \begin{sdblock}{Connection - TCP protocol}{}
+    \begin{sdblock}{Data Sync Protocol}{}
+      \begin{call}{server}{startP2PGame()}{server}{}
 
-      \begin{call}{server}{openToClientConnection()}{server}{\textit{Once all clients connect...}}
-        \postlevel
-        \postlevel
-        \postlevel
-        \postlevel
-      \end{call}
-
-      \prelevel \prelevel \prelevel
-      \prelevel \prelevel
-      \mess{client}{JR[UDP Port to use]}{server}
-      \begin{call}{client}{listenForServerMsg()}{client}{}
-        \mess{server}{JA<ID>}{client}
-      \end{call}
+        \prelevel
+        \begin{call}{client}{startP2PGame()}{client}{}
 
 
-      \begin{call}{client}{listenForServerMsg()}{client}{}
-        \mess{server}{DE[<ID><VAL>...]}{client}
+          \postlevel
+          \begin{call}{client}{startGame()}{game_cli}{}
+            \prelevel
+            \begin{call}{server}{startGame()}{game_serv}{}
+
+
+              \begin{sdblock}{Game Loop}{}
+                \mess{game_cli}{UP<ID><VAL>}{game_serv}
+                \mess{game_serv}{UP<ID><VAL>}{game_cli}
+              \end{sdblock}
+            \end{call}
+            \prelevel
+          \end{call}
+
+        \end{call}
+        \prelevel
       \end{call}
     \end{sdblock}
 
-    \begin{sdblock}{Update Loop - UDP protocol}{}
-
-      \begin{call}{server}{startUpdateLoop()}{server}{\textit{simulation finished}}
-        \postlevel \postlevel \postlevel
-        \postlevel \postlevel \postlevel
-      \end{call}
-      \prelevel \prelevel \prelevel
-      \prelevel \prelevel \prelevel
-
-
-      \begin{call}{client}{startServerListen()}{server-lsn}{\textit{loop}}
-        \mess{server}{CS< <ID><VAL> ... >}{server-lsn}
-        \postlevel \postlevel \postlevel
-      \end{call}
-
-      \prelevel \prelevel \prelevel
-      \begin{call}{client}{startKeyboardListen()}{key-lsn}{}
-        \mess{key-lsn}{UP<VAL>}{server}
-      \end{call}
-
-    \end{sdblock}
   \end{sequencediagram}
 
-  \caption{Graph showing the protocol of joining a session hosted on the server as well as sending and receiving updates.}
-  \label{fig:client-protocol}
+  \caption{Sequence Diagram showing the protocol of sending and receving updates with the peer to peer model.}
+  \label{fig:peer_to_peer_graph}
 \end{figure}

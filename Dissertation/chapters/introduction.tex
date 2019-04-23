@@ -54,7 +54,7 @@ Broadcast to each client
 \subsubsection{Latency}
 The paper \mycite{bettner20011500}, documents the architecture and implementation of networking approaches in the RTS (Real Time Startegy) games ``Age of Empires'' 1 and 2. The authors talk about an experiment that has been performed with the game netcode where players were interviewed on whether they felt that their game inputs felt responsive at differnet latencies between the players. They have found that when playing with a latency of 250ms or less, the latency was not noticible at all. Latencies between 250ms and 500ms were ``very playable''. Anything more than 500ms would start becoming noticible however. They have also found that when playing with a noticible latency, the players have naturally developed a ``mental expectation of the lag'' between the inputs and an action happening. After developing this ``game pace'', they would enjoy playing the game at a consistent slower response than altering between slow and fast letency.
 
-What can be seen in this example, is that while making the latency between inputs and actions, does make the game more responsive and fun, noticible jitter when receiving messages can also impact the player's experiance in significant ways.
+What can be seen in this example, is that while making the latency between inputs and actions, does make the game more responsive and fun, noticible jitter when receiving messages can also impact the player's experience in significant ways.
 
 
 \subsubsection{Reliability}
@@ -62,6 +62,7 @@ UPD can lose packets........ The article \mycite{lincroft1999internet} documents
 
 \subsubsection{Bandwidth}
 Consumer hardware and networking slow (esp upload)
+Talk about how MTU Works
 
 \subsection{Inconsistant ping between players}
 There are many different possible reasons for the lag to the server to vary widely from player to player. Firstly, it is possible that there are not enough servers throughout the world or that they are not spread out evenly enough across all regions. Players who live in geographically more remote locations, are likely to experience higher ping to servers compared to those that live in more densly populated cities due to where the servers are likely to be located. Secondly, there is no way of guaranteeing if the clients are going to be using a wired or a wireless connection to connect to the server. Wireless connections can be much slower and are more likely to introduce other potential problems such as packet loss.
@@ -92,5 +93,11 @@ The client hosted model is an example of implementing a networking infrastructur
 
 \subsection{Peer to Peer Model}
 The idea behind the peer to peer model, is that if two clients can communicate directly, the latency in the connection between them, could be reduced if where wasn't a server that all messages have to go through. The theory here is that the latency beteen players can be as low as theoretically possible which should result in more responsive gameplay. The use of the peer to peer model is often reserved for applications where only a few clients need to communicate with one another and therefore is a common choice for fighting games and RTS (Real Time Strategy) Games.
+
+For the peer to peer model to work, each client (peer), needs to know the IP address of every other client. This presents a potential security risk as any player in the same instance of the simulation, can use the IP address to determine what country, and sometimes city, each client is connecting from. Another potential problem arrises with how the information about each client is distributed to each client. One potential idea of how this could be done, is to have a central server that manages sessions and matchmaking. Clients that are looking for a session with an open spot, would send a join request message to this known server address. This server would match players up based on factors such as player skill. Once enough players have requested to join to start the simulation, the server would broadcast the IP and Port of each client to each other client. From that point, each client has all the information that it needs to start the simulation execution.
+
+If the goal of using the peer to peer model is to avoid the need for server rental or maintenance, this process could also be done with one of the players hosting the game and having the other players know the address of this hosting client. With this setup, the scenario presented above, would work too.
+
+Since each player is communicating with every other client, there is no central ``real state'' of the simulation and due to latency in connections, the simmulation from each player's perspective could differ slightly. This also means that each client is responsible for maintaining their own state of the simulation. Another conciquence of contacting other clients directly, is that in a randomly selected sample of players in a game that is available worldwide, the latency between each player is likely to vary largely. This can often result in having a slower response when interacting with one player than another who could have a lower latency to you. This could make the game feel unresponsive at times seemingly out of nowhere during gameplay.
 
 \input{fixtures/p2p_attributes}
