@@ -1,4 +1,67 @@
-\chapter{Research}
+\chapter{Background}
+
+\section{Networking principles in games}
+TODO: talk a bit about UDP, TCP/IP and routing...
+
+\subsection{Communitaction Issues}
+In the dissertation \mycite{macedonia1995network}, the author has identified and grouped the most prevelent issues that occur in internet communications. In real time applications such as online games, these issues can be very impactful on the experience of the players.
+
+\subsubsection{Data Distribution}
+Broadcast to each client
+
+\subsubsection{Latency}
+The paper \mycite{bettner20011500}, documents the architecture and implementation of networking approaches in the RTS (Real Time Startegy) games ``Age of Empires'' 1 and 2. The authors talk about an experiment that has been performed with the game netcode where players were interviewed on whether they felt that their game inputs felt responsive at differnet latencies between the players. They have found that when playing with a latency of 250ms or less, the latency was not noticible at all. Latencies between 250ms and 500ms were ``very playable''. Anything more than 500ms would start becoming noticible however. They have also found that when playing with a noticible latency, the players have naturally developed a ``mental expectation of the lag'' between the inputs and an action happening. After developing this ``game pace'', they would enjoy playing the game at a consistent slower response than altering between slow and fast letency.
+
+What can be seen in this example, is that while making the latency between inputs and actions, does make the game more responsive and fun, noticible jitter when receiving messages can also impact the player's experience in significant ways.
+
+
+\subsubsection{Reliability}
+UPD can lose packets........ The article \mycite{lincroft1999internet} documents the issues that the developement team encountered when developing the netcode for the 1997 game ``X-Wing vs. TIE fighter''. The author has experimented with TCP connections in game data transmission and found that ``TCP refuses to deliver any of the other packets in the stream while it waits for the next "in order" packet. This is why we would see latencies in the 5-second range.'' and ``if a packet is having a tough time getting to its destination, TCP will actually stop re-sending it! The theory is that if packets are being dropped that it's due to congestion.''. The features that have been implemented into TCP to make it reliable, end up negatively effecting real-time application data traffic and due to the volume of data to be transmitted, should not be used for time sensitive data.
+
+\subsubsection{Bandwidth}
+Consumer hardware and networking slow (esp upload)
+Talk about how MTU Works
+
+\subsection{Inconsistant ping between players}
+There are many different possible reasons for the lag to the server to vary widely from player to player. Firstly, it is possible that there are not enough servers throughout the world or that they are not spread out evenly enough across all regions. Players who live in geographically more remote locations, are likely to experience higher ping to servers compared to those that live in more densly populated cities due to where the servers are likely to be located. Secondly, there is no way of guaranteeing if the clients are going to be using a wired or a wireless connection to connect to the server. Wireless connections can be much slower and are more likely to introduce other potential problems such as packet loss.
+
+Varying ping between players could lead to a problem of a poor experience for a client with a high ping to the server, as they will receive the updates from the server later than every other player and therefore be at a disadvantage if the game requires real time reactions. Unfortunately under some implementations, this also results in a poor experience for the other players too, who despite having resonable ping to the server, can be shot from behind cover by a laggy player who fired a shot before the cover was reached by them on their version of the game state which is delayed compare to others.
+
+
+\subsubsection{Possible solutions to the variable ping problem}
+Netcode developers of the most popular games, have tried many different solutions to fix or at least mitigate the issue of widely differing ping to the game server between players. One example of a solution here could be ``region locking''. This is the idea that only players with equally low ping, can connect to the same game instance on a server. This could be done by providing game servers spread out across as many geographical regions as possible and only allow players to connect to their local one. This presents two main issues however. Firstly, this prevents players in different geographical regions from playing together and therefore serperates the community. Also, the issue of players in remote areas playing together and having a suboptimal experience due to the server lag, has not been addressed. The developers of Battlefield 1 have implemented an interesting solution to this problem and I will discuss this further on.
+
+
+\newpage
+\section{Networking Model Options}
+TODO; dev have choice. all have positives and negatives.
+
+
+\subsection{The Centralised Server Model}
+Most AAA online multiplayer games that are played today, make use of the ``centralised server model'' for synchronising the simulation state between several clients participating in the same simulation. This means that in an example of a First Person Shooter (FPS), if one player presses the ``jump'' key, their character will jump on their screen. This input information would then also be sent over to the game server. The server would then send the information that this player has jumped, to all other clients. There is a potential problem here however. Given that the ping between the server and client A is \(\alpha\) and between the server and client B is \(\beta\), the time between client A pressing an input and client B being notified of this input can not be less than $\alpha+\beta$ and due to the limitations of physics $\alpha>0$ and $\beta>0$. This means that at any given time the lag experienced between clients A and B will be more than $\alpha+\beta$ when aspects such as server tickrate or network congestion are factored in too.
+
+\input{fixtures/cs_attributes}
+
+
+\subsection{Client Hosted Model}
+The client hosted model is an example of implementing a networking infrastructure without the need for expensive server rental. One of the main advantages of this solution is the idea that one codebase can be written to work as a client hosted model and this codebase can then be adjusted slightly to work on a central server as well if there ever is a need for this in the future. The basic idea behind this implementation method, is that one of the clients, would act as a server for all other participants alongside also being one of the participants. One of the biggest problems with an implementation like this, is that the player that is hosting the game will have a connection to the server with the ping and latency of 0 which will give them an objective advantage in scenarios where quick reaction times are needed. Another potential concern with an implementation like this, is that the player hosting the game, is likely to have consumer grade, lower-end hardware and network connection. It is also possible that a WiFi connection would be used increasing the chance of packet loss and high latency further. There is also a security concern with any networking application that, in order to function, has to know the IP address of every player that is connected. This information can be easily used to determine the country or even the city that the player is connecting from. It would also be possible to find out information about their hardware or network connection through how frequently a packet arrives from this player. A difficulty can also arrise if the host player loses connection to the other players as either the game has to finish or a ``host migration'' would have to take place which is a difficult problem.
+
+\input{fixtures/ch_attributes}
+
+
+\subsection{Peer to Peer Model}
+The idea behind the peer to peer model, is that if two clients can communicate directly, the latency in the connection between them, could be reduced if where wasn't a server that all messages have to go through. The theory here is that the latency beteen players can be as low as theoretically possible which should result in more responsive gameplay. The use of the peer to peer model is often reserved for applications where only a few clients need to communicate with one another and therefore is a common choice for fighting games and RTS (Real Time Strategy) Games.
+
+For the peer to peer model to work, each client (peer), needs to know the IP address of every other client. This presents a potential security risk as any player in the same instance of the simulation, can use the IP address to determine what country, and sometimes city, each client is connecting from. Another potential problem arrises with how the information about each client is distributed to each client. One potential idea of how this could be done, is to have a central server that manages sessions and matchmaking. Clients that are looking for a session with an open spot, would send a join request message to this known server address. This server would match players up based on factors such as player skill. Once enough players have requested to join to start the simulation, the server would broadcast the IP and Port of each client to each other client. From that point, each client has all the information that it needs to start the simulation execution.
+
+If the goal of using the peer to peer model is to avoid the need for server rental or maintenance, this process could also be done with one of the players hosting the game and having the other players know the address of this hosting client. With this setup, the scenario presented above, would work too.
+
+Since each player is communicating with every other client, there is no central ``real state'' of the simulation and due to latency in connections, the simmulation from each player's perspective could differ slightly. This also means that each client is responsible for maintaining their own state of the simulation. Another conciquence of contacting other clients directly, is that in a randomly selected sample of players in a game that is available worldwide, the latency between each player is likely to vary largely. This can often result in having a slower response when interacting with one player than another who could have a lower latency to you. This could make the game feel unresponsive at times seemingly out of nowhere during gameplay.
+
+\input{fixtures/p2p_attributes}
+
+
+\chapter{Related work}
 Throughout this chapter, I will be investigating how networking is implemented in popular modern AAA games. I will also implement a simple online, multiplayer demo game using different ways of implementing networking in the Unity game engine. The experience of using the options that exist in Unity for network game developement, will be similar to what I will aim to implement at a much lower level with my networking template.
 
 \section{Networking implementations in games}
@@ -48,3 +111,7 @@ Similar to UNET, allows for easy and free server sental for central server model
 
 \subsection{Google's Stadia}
 Allows for easy networking since it's already on server
+
+
+\section{Related work summary}
+TODO: what I am going to focus on and why and this leads nicely into chapter 3
