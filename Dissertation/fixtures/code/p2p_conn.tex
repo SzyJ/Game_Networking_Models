@@ -1,0 +1,31 @@
+\begin{figure}[!h]
+  \centering
+  \begin{lstlisting}
+      GNAT::Peer* peer = new GNAT::Peer();
+
+      int successful = 0;
+      successful = peer->openAsSessionHost();
+      if (!successful) {
+        // Log and abort
+      }
+  \end{lstlisting}
+  \caption{Process of opening a peer up to connections from other peers}
+  \label{code:peer_conn_host}
+\end{figure}
+
+
+\begin{figure}[!h]
+  \centering
+  \begin{lstlisting}
+      GNAT::Peer* peer = new GNAT::Peer();
+
+      int successful = 0;
+      // Session Host Details already configured
+      successful = peer->connectToSessionHost();
+      if (!successful) {
+        // Log and abort
+      }
+  \end{lstlisting}
+  \caption{Process for a peer connecting to peer session host}
+  \label{code:peer_conn_join}
+\end{figure}

@@ -57,19 +57,12 @@ In conclusion, the networking for a game should not be transmitting at a rate th
 
 
 \subsection{Message Structure Strategies}
-
 \subsubsection{Data Representation}
-Depening on the complexity of the game and the amount players participating in the same game instance, it is likely that a large amount of data has to be sent many times from within the main game loop. The data will be transmitted over the internet as a series of bytes and will have to be understood and put together again at the recipient's end. One of the challenges of designing a networking, real-time application, is working around the idea that for any packet sent with UDP, there is no guarantee that it will arrive.
-
+Depending on the complexity of the game and the amount players participating in the same game instance, it is likely that a large amount of data has to be sent many times from within the main game loop. The data will be transmitted over the internet as a series of bytes and will have to be understood and put together again at the recipient's end. One of the challenges of designing a networking, real-time application, is working around the idea that for any packet sent with UDP, there is no guarantee that it will arrive.
 
 There are many different ways that the same data can be represented and each one is carefully designed to be the most appropriate for it's use. Consider the two figures below of common ways of grouping complex data in an ``easily readable'' format; XML in Figure \ref{fig:xml-example} and JSON in Figure \ref{fig:json-example}. These examples have been adapted from the article \mycite{fiedler2016packets}.
 
-
-While these formats make it easy for humans to read and understand what is being represented and reading and processing data represented like this is a common operation in software, a lot of characters are used to represent a small amount of data. In both examples, each line would have to be parsed for recognised symbols such as ``position'' or ``health''. When a sybmol like this is encountered, it's value would have to be found and parsed. The value for position represented as ``(0, 0, 0)'' would have to be parsed and the numbers extracted to appropriate types in code from chars. The type would have to be checked to make sure that non-numeric characters aren't being represented as numeric types and many other issues such as this arrise. When data has to be read and used many times a second, we would like this process to be as smooth as possible and therefore, we should optimise this representation.
-
-
-Packet payloads consist of a sequence of bytes. If we were to send over data represented with JSON or XML, each character would be represented as a signed byte (char). These bytes would be processed one by one to extract the useful data. One optimisation that we could do is represent numerical values like they would be represented in memory. If we know that the number can not be negative, such as health, we can use this to represent it as an unsigned byte increasing the possible range. A signed byte can represent values between -126 and 127. An unsigned byte can represent values between 0 and 225.
-
+While these formats make it easy for humans to read and understand what is being represented and reading and processing data represented like this is a common operation in software, a lot of characters are used to represent a small amount of data. In both examples, each line would have to be parsed for recognised symbols such as ``position'' or ``health''. When a symbol like this is encountered, it's value would have to be found and parsed. The value for position represented as ``(0, 0, 0)'' would have to be parsed and the numbers extracted to appropriate types in code from chars. The type would have to be checked to make sure that non-numeric characters aren't being represented as numeric types and many other issues such as this arrise. When data has to be read and used many times a second, we would like this process to be as smooth as possible and therefore, we should optimise this representation.
 
 \newpage
 \begin{figure}[!ht]
@@ -123,8 +116,11 @@ Packet payloads consist of a sequence of bytes. If we were to send over data rep
 \caption{An example of a representation of world data in the JSON format}
 \label{fig:json-example}
 \end{figure}
-
 \newpage
+
+\subsubsection{Optimising the data representation}
+Packet payloads consist of a sequence of bytes. If we were to send over data represented with JSON or XML, each character would be represented as a signed byte (char). These bytes would be processed one by one to extract the useful data. One optimisation that we could do is to represent numerical values like they would be represented in memory, instead of representing them with number characters in base 10.A signed byte can represent values between -128 and 127. An unsigned byte can represent values between 0 and 225. This optimisation would mean that the numerical value is represented in 1 byte rather than up to 4. If we know that the number can not be negative, such as a value representing health, we can use this information to extend the possible range of this value by representing it as an unsigned byte rather than a signed byte. If a number value out of these ranges is to be represented, several concecutive bytes in sequence can be used to represent this value. For example in C++ depending on the architecture and compiler, an \lstinline{int} type could be represented in 2 or 4 bytes.
+Another possible optimisation could be done when searching the message for values. Each value represents something in the game and we need a way to distinguish between what each value means. In the examples in Figures \ref{fig:xml-example} and \ref{fig:json-example}, this is done by having a name for each value. For example the name could be ``health'' and the value could be ``100''. An issue with this approach is that multiple bytes have to be read and processed to understand that bytes representing ``h'', ``e'', ``a'' etc. in that order mean that the value will represent health. This process requires many comparisons to check what each value means. There are several ideas that could address this issue. Firstly, instead of a name string, each value could have an ID and that way with 1 byte, it can be determined what the value that follows represents. This would work for up to 256 different values, however if more are needed, a 2 byte ID could be used to represent 65536 diffent values. Comparing 1 or 2 bytes is a much more efficient task than processing a string of undefined length. Another idea could be that each message that is expected from the server is of a predefined format. This could be used by the receving party knowing that, for example, bytes 3 and 4 of the message represent a signed integer representing the x coordinate of the player. If a protocol is designed correctly, it should be possible to read the value at a known location (known offset from where the buffer for the received message starts) when it is needed intead of reading the message to understand what each value is. This approach may not work as well when a lot of data is transmitted however and could even become wasteful if only one value is to be sent but it has to be padded with wasted space in order to offset it to it's correct position.
 
 
 \subsubsection{Detecting and Dealing with Packet Loss}
@@ -217,81 +213,71 @@ The application will not:
 \item Requirement
 \end{enumerate}
 
+\newpage
+\subsection{Interfaces and usage}
 
-\subsection{Code Architecture}
+\subsubsection{Interface for the client hosted model connection}
+Fixtures \ref{code:server_conn} and \ref{code:client_conn} represent how I intend my library to be used to establish a connection between a client and server. The host of the game would be expected to run both the server and client code from the very start. The client on the host's instance is expected to be configured to connect to the server at the location of \lstinline{127.0.0.1}, meaning that they will be sending the request just like the other clients but to themselves. This implementation will allow for a client to choose to host a game without joining it if that is ever desired. The connection server should be started before any clients attempts to establish a connection with it. Both of these calls will block the current thread until the connection process is completed. No networking activity should be done until this is finished.
 
+% code:server_conn
+% code:client_conn
+\input{fixtures/code/ch_conn}
 
-\subsubsection{Interface for the client hosted model}
-
-\begin{figure}[!h]
-  \centering
-  \begin{lstlisting}
-      GNAT::Server* server = new GNAT::Server();
-
-      int successful = 0;
-      successful = server->startConnectionServer();
-      if (!successful) {
-        // Log and abort
-      }
-  \end{lstlisting}
-  \caption{Process of opening server to client connections}
-  \label{code:server_conn}
-\end{figure}
-
-\begin{figure}[!h]
-  \centering
-  \begin{lstlisting}
-      GNAT::Client* client = new GNAT::Client();
-
-      int successful = 0;
-      // Server Details already configured
-      successful = client->connectToServer();
-      if (!successful) {
-        // Log and abort
-      }
-  \end{lstlisting}
-  \caption{Process of client connecting to server}
-  \label{code:client_conn}
-\end{figure}
+\begin{itemize}
+\item The client will return a successful, positive error code if the connection to the server was successful, in this case, it eady is ready to send and receive UDP packets with the server once the game starts.
+\item The server will return a successful, positive error code if a join request has been received from the correct amount of clients and the join acknowledgement successfully sent to each of them. If this is the case, the server is ready to listen for UDP packets from the clients that have joined and broadcast messages to them.
+\item If a negative value is returned during the connection process from the client or the server, undefined behaviour can occur if the program proceeds.
+\end{itemize}
 
 \newpage
-\subsubsection{Interface for the peer to peer model}
+\subsubsection{Interface for the client hosted model game loop}
 
-\begin{figure}[!h]
-  \centering
-  \begin{lstlisting}
-      GNAT::Peer* peer = new GNAT::Peer();
-
-      int successful = 0;
-      successful = peer->openAsSessionHost();
-      if (!successful) {
-        // Log and abort
-      }
-  \end{lstlisting}
-  \caption{Process of opening a peer up to connections from other peers}
-  \label{code:peer_conn_host}
-\end{figure}
-
-
-\begin{figure}[!h]
-  \centering
-  \begin{lstlisting}
-      GNAT::Peer* peer = new GNAT::Peer();
-
-      int successful = 0;
-      // Session Host Details already configured
-      successful = peer->connectToSessionHost();
-      if (!successful) {
-        // Log and abort
-      }
-  \end{lstlisting}
-  \caption{Process for a peer connecting to peer session host}
-  \label{code:peer_conn_join}
-\end{figure}
+% code:server_game
+% code:client_game
+\input{fixtures/code/ch_game}
 
 \newpage
+\subsubsection{Interface for the peer to peer model connection}
+Figures \ref{code:peer_conn_host} and \ref{code:peer_conn_join} represent how I intend my library to be used with a game using a peer to peer model. Hosting the game as session host, should automatically add them as one of the clients in the connection process so no other networking thread needs to be started. Both of these calls will block the current thread until the connection process has finished.
 
+% code:peer_conn_host
+% code:peer_conn_join
+\input{fixtures/code/p2p_conn}
+
+\begin{itemize}
+\item The session host will return a successful, positive error code once the expected amout of clients have joined and the info about each client has been broadcast successfully to each client.
+\item The joining client will return a successful, positive value once it successfully connects to the session host, receives the join acknowledgement and successfully receives client info about each other client.
+\item If a negative value is returned during the connection process from the hosting or joining peer, undefined behaviour can occur if the program proceeds.
+\end{itemize}
+
+
+\newpage
+\subsubsection{Interface for the peer to peer model game loop}
+
+% code:peer_game
+\input{fixtures/code/p2p_game}
+
+
+\newpage
 \subsubsection{Conceptual Application Flow}
 
+\subsection{Introducing a delay in broadcasing}
+\newpage
+\vfill
+\begin{figure}[!h]
+  \centering
+  \includegraphics[width=\textwidth]{GNAT/sending_too_fast.png}
+  \caption{Messages being broadcast with no delay}
+  \label{fig:broadcast_too_fast}
+\end{figure}
 
-\subsection{Testing my implementation}
+\begin{figure}[!h]
+  \centering
+  \includegraphics[width=\textwidth]{GNAT/sending_with_delay.png}
+  \caption{Messages being broadcast with delay}
+  \label{fig:broadcast_with_delay}
+\end{figure}
+\vfill
+\newpage
+
+\section{Testing my implementation}

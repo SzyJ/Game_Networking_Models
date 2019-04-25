@@ -1,0 +1,15 @@
+\begin{figure}[!h]
+  \centering
+  \begin{lstlisting}
+      // ... after successful connection ...
+
+      successful = peer->startP2PGame();
+      if (!successful) {
+        // Log and abort
+      }
+
+      // Game successfully finished.
+  \end{lstlisting}
+  \caption{Process of starting the listening and sending threads in a peer to peer game}
+  \label{code:peer_game}
+\end{figure}

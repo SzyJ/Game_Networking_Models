@@ -1,0 +1,31 @@
+\begin{figure}[!h]
+  \centering
+  \begin{lstlisting}
+      // ... after successful connection ...
+
+      successful = server->startGameServer();
+      if (!successful) {
+        // Log and abort
+      }
+
+      // Game successfully finished.
+  \end{lstlisting}
+  \caption{Process of opening server to client connections}
+  \label{code:server_game}
+\end{figure}
+
+\begin{figure}[!h]
+  \centering
+  \begin{lstlisting}
+      // ... after successful connection ...
+
+      successful = client->startGameClient();
+      if (!successful) {
+        // Log and abort
+      }
+
+      // Game successfully finished.
+  \end{lstlisting}
+  \caption{Process of client connecting to server}
+  \label{code:client_game}
+\end{figure}

@@ -1,6 +1,8 @@
 ## Ignore projects that are now only used as a reference
 /Project
 /Other_Documents
+/Dissertation/fixtures/code/auto/
+
 
 ## Core latex/pdflatex auxiliary files:
 *.aux
@@ -233,7 +235,7 @@ TSWLatexianTemp*
 *~[0-9]*
 
 # auto folder when using emacs and auctex
-./auto/*
+.*/auto/*
 *.el
 
 # expex forward references with \gathertags
