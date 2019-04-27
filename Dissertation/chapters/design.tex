@@ -195,7 +195,7 @@ Another advantage of the Windows platform is the system manager that clearly dis
 Winsock is a C++ networking library developed by Microsoft based on the BSD sockets API. There are many similarities between the BSD and Microsoft implementations and most of the functions share a signiture, meaning that a Windows implementation can be easily adapted to work on Unix systems, with little modifications. Since most of my networking and message management logic will be implemented by me, I will only be using Winsock for establishing TCP connections and sending simple packets. These simple requirements, can be satisfied by any networking library so the choice of Winsock was largely arbitrary. An advantages that Winsock has over other libraries however, include very detailed and well written documentation and example library and the fact that it is being maintained by Microsoft, who also maintains Windows. The large collection of examples allowed me to make a quick start with Winsock and the mechanisms for sending and receiveing packets were very easily implemented.
 
 \subsection{Application Specifications}
-TODO
+Before the start of the developement process, it is important to
 \\
 \\
 What should the application be able to do?
@@ -217,24 +217,21 @@ The application will not:
 \subsection{Interfaces and usage}
 
 \subsubsection{Interface for the client hosted model connection}
-Fixtures \ref{code:server_conn} and \ref{code:client_conn} represent how I intend my library to be used to establish a connection between a client and server. The host of the game would be expected to run both the server and client code from the very start. The client on the host's instance is expected to be configured to connect to the server at the location of \lstinline{127.0.0.1}, meaning that they will be sending the request just like the other clients but to themselves. This implementation will allow for a client to choose to host a game without joining it if that is ever desired. The connection server should be started before any clients attempts to establish a connection with it. Both of these calls will block the current thread until the connection process is completed. No networking activity should be done until this is finished.
+Fixtures \ref{code:server_conn} and \ref{code:client_conn} represent how I intend my library to be used to establish a connection between a client and server. The host of the game would be expected to run both the server and client code from the very start. The client on the host's instance is expected to be configured to connect to the server at the location of \lstinline{127.0.0.1}, meaning that they will be sending the request just like the other clients but to themselves. This implementation will allow for a client to choose to host a game without joining it if that is ever desired. The connection server should be started before any clients attempt to establish a connection with it. Both of these calls will block the current thread until the connection process is completed. No networking activity should be done until this is finished.
 
 % code:server_conn
 % code:client_conn
 \input{fixtures/code/ch_conn}
 
-\begin{itemize}
-\item The client will return a successful, positive error code if the connection to the server was successful, in this case, it eady is ready to send and receive UDP packets with the server once the game starts.
-\item The server will return a successful, positive error code if a join request has been received from the correct amount of clients and the join acknowledgement successfully sent to each of them. If this is the case, the server is ready to listen for UDP packets from the clients that have joined and broadcast messages to them.
-\item If a negative value is returned during the connection process from the client or the server, undefined behaviour can occur if the program proceeds.
-\end{itemize}
 
 \newpage
 \subsubsection{Interface for the client hosted model game loop}
+Fixtures \ref{code:server_game} and \ref{code:client_game} represent how I intend my library to be used to start the main game loop responsible for sharing data between server and client. Both will start two threads; one for listening for data and one for sending data. These functions should not be called before a connection has been established between the server and the clients and a non-negative error code returned from the connection functions.
 
 % code:server_game
 % code:client_game
 \input{fixtures/code/ch_game}
+
 
 \newpage
 \subsubsection{Interface for the peer to peer model connection}

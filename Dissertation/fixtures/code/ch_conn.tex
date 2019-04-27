@@ -12,6 +12,13 @@
   \caption{Process of opening server to client connections}
   \label{code:server_conn}
 \end{figure}
+\textbf{startConnectionServer() returns:}
+\begin{itemize}
+\item A positive error code if a join request has been received from the correct amount of clients and the join acknowledgement successfully sent to each of them.
+
+\item A negative error code indicating the error that occured is returned otherwise.
+\end{itemize}
+
 
 \begin{figure}[!h]
   \centering
@@ -28,3 +35,10 @@
   \caption{Process of client connecting to server}
   \label{code:client_conn}
 \end{figure}
+
+\textbf{connectToServer() returns:}
+\begin{itemize}
+\item A positive error code value if the connection to the server was successful, the join request was sent successfully and a valid join acknowledgement is received.
+
+\item A negative error code value indicating the error that occured otherwise.
+\end{itemize}
