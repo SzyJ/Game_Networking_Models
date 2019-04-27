@@ -1,4 +1,4 @@
-\chapter{Design and Implementation}
+\chapter{Design}
 
 \section{Protocols}
 During any connection that can be deployed between several processes on a machine or even different physical hardware in seperate geographical locaitons, many different protocols come into play. In this section, I will investigate the different methods of transferring data over the Internet and discuss the choices that have to be made in the design of my own protocol to allow for different clients connecting to eachother and sending data.
@@ -179,13 +179,13 @@ TODO similar to client and server but sends multiple messages instead of one.
 \newpage
 
 
-\section{Implementation}
+\chapter{Implementation}
 I will be writing a simple implementation for the client hosted and peer to peer networking models in c++ using the Winsock library for networking. The goal with this project is to gain insight into how networking systems are implemented in real time applications and identify potential implementation pitfalls for such a system. Alongide the networking logic, I will write a console application that allows me to open several instances of itself to test message transporting between them. This console application will make use of my networking implementations and therefore allow me to easily test my networking functionality as I implement it.
 
-\subsection{Tools and Technologies}
+\section{Tools and Technologies}
 I have identified what technologies I want to use for this project. In this section, I will be analysing each one and provide alternatives that I could have used instead.
 
-\subsubsection{Why C++}
+\subsection{Why C++}
 There are many programming languages avaliable today, each with it's own strengths and weaknesses, each with a purpose that it was designed for. By nature, some langauges are more appropriate for some tasks over others and weighing out the pros and cons is important when making a decision of what language to use for a project.
 
 Historically, game developement has always fundamentally pushed the boundries of the most powerful hardware that is available at the time of developement. Nowdays, players can enjoy large, expansive virtual worlds with complex mechanics and realistic looking grapics. All these aspects of modern games, demand a large amout of computation that needs to be performed many times a second. The only way to do so much in little time is to make full use of any resources we can use, as efficiently as possible. Originally, the only real way of writing programs, was to manipulate memory locations directly. The management of memory has proved to be a difficult task for any larger scale project, and thus languages such as C and later C++ were born. They allowed us to more easily command the hardware and made programming much more accessable to more people. As time went on, new languages were introduced, that fundamentally did the same thing, but made tasks such as memory management much easier allowing people to quickly write programs and not worry about the intricasies of memory, processing and OS. This developement ended up being a double eadged sword however. Any improvement to ease of use, ended up having a performance cost. Languages such as Java, run in their own virtual machine allowing it to be easily portable to many different operating systems and hardware configurations. This however limits Java to not be able to access hardware resources, such as memory, as easily. The reason why C++, and C to a slightly lessed extent, to remain relevant through these changes in the industry, is that these languages run on the hardware itself rather than a virtual environment. The benefits of this include being able to easily access system memory which is essential when optimising code for performance. C++ has no built in garbage collection that is happening behind the scenes in code execution, the progammer controls which memory is being used and which can be released. The ``pay for what you use'' nature of C++ lets programmers use the processor power for their computation and not worry about anything else stealing it away.
@@ -193,19 +193,19 @@ Historically, game developement has always fundamentally pushed the boundries of
 These are the main reasons why C++ is used in games and for the same reasons, it is a useful language for any action that has to happen in real time, such as game networking. If my library is written in C++, it would allow a game written in C++ to easily and natively integrate with it. Also, writing efficient packet payloads requires bit-level control and addressing memory locations with pointers, allows me to do this easily. A good networking library should run in the background of an application and not be noticed by the user, unless something goes wrong. The networking service should steal as little performance power from the main game as possible. This can be done with good C++ programming.
 
 
-\subsubsection{Why focus on Windows}
+\subsection{Why focus on Windows}
 Most popular, modern games that are released in today's games industry, are only developed for Windows, there are several reasons for this operating system bias. Firstly, the production of a game is costly and the developement and QA testing on multiple platforms only increases this cost. The business decision for making the most profit, often comes down to developing for the largest userbase, which in this case is Windows. Microsoft has developed many tools, such as DirectX, to entice this behaviour further by making access to video and sound hardware resources easier which only accelerated this trend.
 For the same reason, if my intention for my application is to be useful for low-level game developement, it would be wise to target the windows platform.
 
 Another advantage of the Windows platform is the system manager that clearly display performance statistics such as CPU and RAM usage as well as the networking bandwidth used by each application.
 
 
-\subsubsection{Why the Winsock library}
+\subsection{Why the Winsock library}
 Winsock is a C++ networking library developed by Microsoft based on the BSD sockets API. There are many similarities between the BSD and Microsoft implementations and most of the functions share a signiture, meaning that a Windows implementation can be easily adapted to work on Unix systems, with little modifications. Since most of my networking and message management logic will be implemented by me, I will only be using Winsock for establishing TCP connections and sending simple packets. These simple requirements, can be satisfied by any networking library so the choice of Winsock was largely arbitrary. An advantages that Winsock has over other libraries however, include very detailed and well written documentation and example library and the fact that it is being maintained by Microsoft, who also maintains Windows. The large collection of examples allowed me to make a quick start with Winsock and the mechanisms for sending and receiveing packets were very easily implemented.
 
 
 \newpage
-\subsection{Application Specifications}
+\section{Application Specifications}
 Before the start of the developement process, it is important to consider what requirements the end product should and should not be able to fulfill. This will outline the scope of the project and determine what will be out of developement scope due to time constraints. Alongside the networking code, I intend to also develop a commandline application that allows me to issue commands that will call public functions in my library. This application will allow me to test that my code does what I expect as the developement progresses and allow me to perform tests on the final product.
 \\
 \\
@@ -225,11 +225,11 @@ Before the start of the developement process, it is important to consider what r
 \end{enumerate}
 
 \newpage
-\subsection{Interfaces and usage}
+\section{Interfaces and usage}
 In this section, I will plan put how my code is intented to be called through classes that would be instanciated in the main program. I will outline what each function should do and what value it should return in successful and unsuccessful scenarios.
 
 
-\subsubsection{Interface for the client hosted model connection}
+\subsection{Client hosted model connection}
 Fixtures \ref{code:server_conn} and \ref{code:client_conn} represent how I intend my library to be used to establish a connection between a client and server. The host of the game would be expected to run both the server and client code from the very start. The client on the host's instance is expected to be configured to connect to the server at the location of \lstinline{127.0.0.1}, meaning that they will be sending the request just like the other clients but to themselves. This implementation will allow for a client to choose to host a game without joining it if that is ever desired. The connection server should be started before any clients attempt to establish a connection with it. Both of these calls will block the current thread until the connection process is completed. No networking activity should be done until this is finished.
 
 % code:server_conn
@@ -238,7 +238,7 @@ Fixtures \ref{code:server_conn} and \ref{code:client_conn} represent how I inten
 
 
 \newpage
-\subsubsection{Interface for the client hosted model game loop}
+\subsection{Client hosted model game loop}
 Fixtures \ref{code:server_game} and \ref{code:client_game} represent how I intend my library to be used to start the main game loop responsible for sharing data between server and client. Both will start two threads; one for listening for data and one for sending data. These functions should not be called before a connection has been established between the server and the clients and a non-negative error code returned from the connection functions.
 
 % code:server_game
@@ -247,7 +247,7 @@ Fixtures \ref{code:server_game} and \ref{code:client_game} represent how I inten
 
 
 \newpage
-\subsubsection{Interface for the peer to peer model connection}
+\subsection{Peer to peer model connection}
 Figures \ref{code:peer_conn_host} and \ref{code:peer_conn_join} represent how I intend my library to be used with a game using a peer to peer model. Hosting the game as session host, should automatically add them as one of the clients in the connection process so no other networking thread needs to be started. Both of these calls will block the current thread until the connection process has finished.
 
 % code:peer_conn_host
@@ -256,7 +256,7 @@ Figures \ref{code:peer_conn_host} and \ref{code:peer_conn_join} represent how I 
 
 
 \newpage
-\subsubsection{Interface for the peer to peer model game loop}
+\subsection{Peer to peer model game loop}
 Once the connection has been successful with each peer, the game loop should be started by each one. After the connection process, it shouldn't matter if the peer is a session host or just joining a session. In the main game loop, clients will communicate with eachother regardless.
 
 
@@ -265,8 +265,11 @@ Once the connection has been successful with each peer, the game loop should be 
 
 
 \newpage
-\subsubsection{Conceptual Application Flow}
+\section{Conceptual usage flow}
 
+
+
+\section{Unforceen Issues in Developement}
 \subsection{Introducing a delay in broadcasing}
 \newpage
 \vfill
