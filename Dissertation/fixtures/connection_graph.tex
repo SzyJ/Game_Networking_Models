@@ -1,4 +1,4 @@
-\begin{figure}[h]
+\begin{figure}[p]
 
   \centering
   \begin{sequencediagram}
@@ -40,7 +40,7 @@
           \end{call}
 
           \begin{sdblock}{Only for P2P connection}{}
-            \begin{call}{client}{listenForPeerInfo()}{conn_cli}{}
+            \begin{call}{client}{listenForPeerInfo()}{conn_cli}{clients}
               \prelevel
               \begin{call}{server}{broadcastPeerInfo()}{conn_serv}{}
                 \mess{conn_serv}{DF<ID><ADDR>}{conn_cli}

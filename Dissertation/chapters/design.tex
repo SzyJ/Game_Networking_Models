@@ -11,7 +11,7 @@ Next comes the transport layer where either UDP\footnote{UDP: User Datagram Prot
 The next layer of protocols is the operating system interface or library, that is called by applications needing to share data using the above protocols. With Windows, a library called ``WinSock'' is often used, however other options are also available such as enet, asio, RakNet... This is where a programmer would be able to configure which protocols to use (Like TCP or UDP, IP or X.25 amongst many other configurable options).
 
 
-\subsection{Connecting the clients together}
+\subsection{Connecting the clients together} \label{sec:client_connections}
 When connecting multiple clients together, no matter what model is uesd, the session host or the server will need to know what clients will participate in this game session. A brute force solution to this would be to hard code all the information that is needed by each of the participating parties. This solution presents many flaws however. The configuration on each client would have to be configured before the first run on each new participant, as well as when a different connection pattern is wanted. While this solution would be simplest, the issues associated with connecting new clients and synchronising multiple configuration files for the syetem to work together, make this infeasable.
 A common solution used in the industry is to use something known as a matchmaking server. This is a seperate server with a publicly known IP address, that would be tasked with listening in for join messages from clients and finding the best matches of players based on many different factors such as ping to the game server or player skill. The information about each client would then be passed onto the game server for the processing to start. The matchmaking idea provides many advantages including taking away the computation associated with connecting from the main gameplay server however when developing a networking solution without a central server, this defeats the point.
 The most appropriate solution that I have found, combines both ideas. Firstly, there will need to be a way for the user to define what the address of the server or session host peer is. This can be done through a configuration file or getting an input from the user. With the server address known, each client can send a message to that address requesting to join a game. The client receiveing this information, would essentially act as a matchmaking server and after getting requests to join from enough players, the game could start.
@@ -147,7 +147,16 @@ Understanding message code descriptions:
 \section{Protocol Flow}
 
 \subsection{Establishing connection}
-TODO write how code can be reused
+Before a networking application can funtion, a connection between at least two different parties has to be established so that data can be transferred between them. As mentioned in the Section \ref{sec:client_connections}, the connection process should use the TCP protocol to ensure that all clients have the data that they need. Since this implies that a TCP port will have to be appointed to serve for client connections, it would be wise to seperate the connection logic from the game loop and UDP packet logic.
+Two different classes should be made to handle hosting and joining during the connection process; \lstinline{ConnectionClient} and \lstinline{ConnectionServer}. Since the basic information that will be transferred between clients is similar in the peer to peer model and the client hosted model, these classes' logic can be reused for both models. The largest difference between the connection process between the client hosted model and the peer to peer model, is that the peer to peer model has an extra step of broadcasing client information after all clients have received their join acknowledgement message.
+
+Since during the connection process the UDP port number should be sent to the host, any joining client will have to initialise the winsock library for the UDP connection before the join request is sent to the \lstinline{ConnectionServer}.
+
+After the connection process has finished, the \lstinline{ConnectionServer} class, will have a list of all the clients that have joined. This list should then be passed onto the class that will run as the server during the main game loop. In the case of the client hosted model server, this list would be passed into \lstinline{GameServer} and \lstinline{GameClient} should not have the knowledge of what other players are in the game outside of what is broadcast by the server. In the case of the peer to peer model, the session host will use the list from the \lstinline{ConnectionServer} whilest each other peer will have to compile their own lists from the information broadcasted at the end of the connection process.
+
+
+
+
 
 %fig:connection_graph
 \input{fixtures/connection_graph}
@@ -194,20 +203,22 @@ Another advantage of the Windows platform is the system manager that clearly dis
 \subsubsection{Why the Winsock library}
 Winsock is a C++ networking library developed by Microsoft based on the BSD sockets API. There are many similarities between the BSD and Microsoft implementations and most of the functions share a signiture, meaning that a Windows implementation can be easily adapted to work on Unix systems, with little modifications. Since most of my networking and message management logic will be implemented by me, I will only be using Winsock for establishing TCP connections and sending simple packets. These simple requirements, can be satisfied by any networking library so the choice of Winsock was largely arbitrary. An advantages that Winsock has over other libraries however, include very detailed and well written documentation and example library and the fact that it is being maintained by Microsoft, who also maintains Windows. The large collection of examples allowed me to make a quick start with Winsock and the mechanisms for sending and receiveing packets were very easily implemented.
 
+
+\newpage
 \subsection{Application Specifications}
-Before the start of the developement process, it is important to
+Before the start of the developement process, it is important to consider what requirements the end product should and should not be able to fulfill. This will outline the scope of the project and determine what will be out of developement scope due to time constraints. Alongside the networking code, I intend to also develop a commandline application that allows me to issue commands that will call public functions in my library. This application will allow me to test that my code does what I expect as the developement progresses and allow me to perform tests on the final product.
 \\
 \\
-What should the application be able to do?
+\textbf{What the application should be able to do?}
 \begin{enumerate}
-\item Allow the developer using the library, to choose whether they wish to use the peer to peer model or the client hosted model.
+\item Allow for choice between the peer to peer model or the client hosted model for programs using this code.
 \item The tick rate of data broadcasting should be configurable.
 \item The only requirement to using the functionality is to clone the library in a known location. Only one import should be needed.
-\item Every public intreface should belong to the same namespace.
+\item Every class that a user would interact with, should belong to the same namespace.
 \end{enumerate}
-The application will not:
+\textbf{What the application should not be able to do?}
 \begin{enumerate}
-\item Requirement
+\item Send arbitrary packet payloads. This implementation is designed to test latency and jitter in UDP packets. Dealing with unexpected data and how the data in messages effects the program state is therefore out of scope. It should however be possible to send different values over in the packet payload to be able to differentiate one packet from another.
 \item Requirement
 \item Requirement
 \item Requirement
@@ -215,6 +226,8 @@ The application will not:
 
 \newpage
 \subsection{Interfaces and usage}
+In this section, I will plan put how my code is intented to be called through classes that would be instanciated in the main program. I will outline what each function should do and what value it should return in successful and unsuccessful scenarios.
+
 
 \subsubsection{Interface for the client hosted model connection}
 Fixtures \ref{code:server_conn} and \ref{code:client_conn} represent how I intend my library to be used to establish a connection between a client and server. The host of the game would be expected to run both the server and client code from the very start. The client on the host's instance is expected to be configured to connect to the server at the location of \lstinline{127.0.0.1}, meaning that they will be sending the request just like the other clients but to themselves. This implementation will allow for a client to choose to host a game without joining it if that is ever desired. The connection server should be started before any clients attempt to establish a connection with it. Both of these calls will block the current thread until the connection process is completed. No networking activity should be done until this is finished.
@@ -241,15 +254,11 @@ Figures \ref{code:peer_conn_host} and \ref{code:peer_conn_join} represent how I 
 % code:peer_conn_join
 \input{fixtures/code/p2p_conn}
 
-\begin{itemize}
-\item The session host will return a successful, positive error code once the expected amout of clients have joined and the info about each client has been broadcast successfully to each client.
-\item The joining client will return a successful, positive value once it successfully connects to the session host, receives the join acknowledgement and successfully receives client info about each other client.
-\item If a negative value is returned during the connection process from the hosting or joining peer, undefined behaviour can occur if the program proceeds.
-\end{itemize}
-
 
 \newpage
 \subsubsection{Interface for the peer to peer model game loop}
+Once the connection has been successful with each peer, the game loop should be started by each one. After the connection process, it shouldn't matter if the peer is a session host or just joining a session. In the main game loop, clients will communicate with eachother regardless.
+
 
 % code:peer_game
 \input{fixtures/code/p2p_game}
