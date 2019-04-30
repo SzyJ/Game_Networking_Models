@@ -58,6 +58,9 @@ If the goal of using the peer to peer model is to avoid the need for server rent
 
 Since each player is communicating with every other client, there is no central ``real state'' of the simulation and due to latency in connections, the simmulation from each player's perspective could differ slightly. This also means that each client is responsible for maintaining their own state of the simulation. Another conciquence of contacting other clients directly, is that in a randomly selected sample of players in a game that is available worldwide, the latency between each player is likely to vary largely. This can often result in having a slower response when interacting with one player than another who could have a lower latency to you. This could make the game feel unresponsive at times seemingly out of nowhere during gameplay.
 
+The paper \mycite{Carter2009} provides an example of a game called ``Panzer Battalion'', where ``each peer computes its own game version, no player is having disadvantages because of high network lags''. This is an example of a game that uses the peer to peer model to allow for players to play together. The authors also explain despite removing a central point of failure, an implementation like this has led to ``contradicting game states'' which could potentially ruin the game experience.
+
+
 \input{fixtures/p2p_attributes}
 
 
@@ -94,22 +97,25 @@ In 2015, a Bungie developer gave an interseting talk at GDC (Game Developer's Co
   \label{fig:destiny2netcode}
 \end{figure}
 
-\subsubsection{Issues with the peer to peer system}
+\subsection{Issues with the peer to peer system}
+The largest issues plaguing the games implemented with the peer to peer system all can be traced back to inconsistancies of state between the peers. This is inevetable when a delay is present in communication between parties. The paper \mycite{Carter2009} discusses some possible solutions that aim to mitigate or eliminate the idea of desynchronised game state. In general, during network communication, it can be sometimes be assumed that the connection is reliable however we can not assume that messages will arrive in the same order as they are sent.
 
+The first idea that is suggested is called ``dead reckoning''. The paper \mycite{smed2002review} discusses this topic in detail. This is the idea of estimating what value is likely to be received from the server in the next packet by evaluating the previous values. In an example of an entity moving through a virtual environment at a constant speed in a constant direction and given that the position of this entity is being broadcasted from another entity, the game client can predict that if the previous packets have updated the position of this entity by the same amount every time, it can calculate the next value that will be received before the packet even arrives. This information can be used to interpolate the position of this entity between the packet that has just arrived and what poition it is expected to be in after the next packet arrives, thus giving the client a more smooth simulation. This also makes the smoothness of the simulation less reliant on network quality, though with low quality networking, the issue of ``rubber banding''\footnote{Rubber Banding is when a client sees an object in a simulation in a certain location but after a update of where this object should be arrives from an authority (server), this position is instantly updated to this new, correct position. From the client's point of view, this looks like the entity has teleported to the new location.} can become prevelent.
 
-\newpage
+Another idea suggested is called ``local lag'' which involves the idea of puting incoming packets into a queue before they are used in the game. Using this method, if packets arrive out of order, they can be put in-order in the local buffer. In some game implementations, two actions performed in different order could result in a different outcome (for example rotating a character and moving them forwards). A potential downside that can arrise from using this method however, involves the fact that additional delay is incorporated to the process of sending information. This makes use of a system like this in games that require timely reactions potentially degrading for the players' experience. Local lag can be implemented in conjunction with dead reckoning for potentially better results.
+
+Finally, an option called ``time warp'' can be utilised for synchronising game state. This technique is often used and well known in the field of Parallel and distributed Discrete Event Simulation (PDES). The paper \mycite{Jefferson1985} explains this topic in detail and ``Time Warm Mechanism'' is well explained. This mechanism listens and applies updates received from other peers when they arrive however, periodic ``snapshots'' of the entire game state are saved. If an inconsistancy is observed (for example if a straggler message is received from another peer), a ``rollback'' is applied to reset the simulation to a previous state, before the inconsistancy was observed. The system would also have to assume that any messages sent before the rollback was performed, were done so under inacurate assumptions. If this is the case, the peer can send a ``null-message'' which would inform the other peers of the inconsistancy and lead them to performing their own ``rollbacks''. This system can often cause ``network floods'' of ``null-messages''.
+
+The system of ``local lag'' assumes that inconsistencies will always occur whereas ``time warp'' can often be concidered to be ``optimistic approaches'' because they allow each client to calculate their simulation state assuming no inconsistancies. Both implementations have uses in different scenarios.
+
 \section{Other networking developement tools}
 TODO:
 
-\subsection{Unity's UNET}
+\subsection{Networking options in Unity}
 Allows for easy implementation of Client Hosted model in Unity. Hard to get working like I wanted.
 
 
-\subsection{Photon Network in Unity}
-Similar to UNET, allows for easy and free server sental for central server model
-
-
-\subsection{Google's Stadia}
+\subsection{Google's Stadia and future networking options}
 At the Game Developers Conference in March 2019, Google has announced a new Game Streaming platform. The talk outlined the plans that would allow developers to develop games for their Linux based platform that would run the game code on Google servers. Users of this service, would be able to play games by sending their inputs to the google servers. All game logic processing would then take place on the Google servers and the audio and video would be returned to the player. This service could potentially allow players to play games on devices with very little processing power, with settings that would normally require much more power.
 
 A potential unexpected advantage of this system, could allow for networking possibilities that would be difficult to make work with current technologies. If a multiplayer game was developed for this system, it could allow for large scale virtual worlds with many players in the same instance as only one simulation would have to be processed for all the players. Each player's perspective would then be sent to them, this wouldn't be much different from how this system would function in a single player scenario.

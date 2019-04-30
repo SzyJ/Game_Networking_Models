@@ -15,9 +15,9 @@
 \end{figure}
 \textbf{startGameServer() returns:}
 \begin{itemize}
-\item TODO
+\item A positive error code once the game instance has been completed successfully.
 
-\item TODO
+\item A negative error code if an unexpected error prevents the game server from starting or if the game has finished ungracefully. The error code will differ based on what error has occured so that it can be identified and dealt with.
 \end{itemize}
 
 
@@ -38,7 +38,7 @@
 \end{figure}
 \textbf{startGameClient() returns:}
 \begin{itemize}
-\item TODO
+\item A positive error code once the game instance has finished successfully.
 
-\item TODO
+\item A negative error code can be returned if the game has finished unexpectedly or an error was encountered with the Winsock connections. The error code can be used to identify what error has occured.
 \end{itemize}

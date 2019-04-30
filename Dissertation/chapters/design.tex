@@ -38,7 +38,7 @@ Overall, this is a much better solution to the original design as the code for t
 
 
 \subsection{Main Game loop and Broadcasting}
-The paper \mycite{smed2002review} discusses the topic of ``dead reckoning'' in detail. This is the idea of estimating what value is likely to be received from the server in the next packet by evaluating the previous values. In an example of an entity moving through a Virtual Environment at a constant speed in a constant direction and given that the position of this entity is being broadcasted from a game server, the game client can predict that if the previous packets have updated the position of this entity by the same amount every time, it can calculate the next value that will be received before the packet even arrives. This information can be used to interpolate the position of this entity between the packet that has just arrived and what poition it is expected to be in after the next packet arrives, thus giving the client a more smooth simulation. This also makes the smoothness of the simulation less reliant on network quality, though with low quality networking, the issue of ``rubber banding''\footnote{Rubber Banding is when a client sees an object in a simulation in a certain location but after a update of where this object should be arrives from an authority (server), this position is instantly updated to this new, correct position. From the client's point of view, this looks like the entity has teleported to the new location.} can become prevelent. Even though the implementation of such a system is out of scope of this project, the way the packets are sent from a server to the clients, can make a process like this easier.
+A technique that is commonly implemented to smooth out the simulation updates is ``dead reaconing'' and is explained well in \mycite{smed2002review}. Even though the implementation of such a system is out of scope of this project, the way the packets are sent from a server to the clients, can make a process like this easier.
 
 The most common implementation for how servers broadcast data from the server to clients in AAA games, is to broadcast all necessary update data at a constant rate, many times a second. If a packet is not delivered to one of the clients, there is no need to resend it since a new updated packet will be sent right after the last one. The constant rate at which the packets are sent and the idea that the same amout of 'in-game' time has passed between each consecutive packet that is sent, makes startegies such as dead reckoning easier to implement than if the updates were sent irregularily.
 
@@ -155,28 +155,21 @@ Since during the connection process the UDP port number should be sent to the ho
 After the connection process has finished, the \lstinline{ConnectionServer} class, will have a list of all the clients that have joined. This list should then be passed onto the class that will run as the server during the main game loop. In the case of the client hosted model server, this list would be passed into \lstinline{GameServer} and \lstinline{GameClient} should not have the knowledge of what other players are in the game outside of what is broadcast by the server. In the case of the peer to peer model, the session host will use the list from the \lstinline{ConnectionServer} whilest each other peer will have to compile their own lists from the information broadcasted at the end of the connection process.
 
 
-
-
-
 %fig:connection_graph
 \input{fixtures/connection_graph}
 \newpage
 
 
-\subsection{Client and Server communication}
-TODO used in client hosted. Host client sends to server just like any other, just destination is localhost.
+\subsection{Broadcasting data}
+The data broadcasting phase happens in the main game loop and this can only begin after the connection has been successfully established between all parties. The Figures \ref{fig:client-protocol_hosted_graph} and \ref{fig:peer_to_peer_graph} below, show the process with which data will be sent between parties. The Figures represent the client hosted model and the peer to peer model respectively.
+In the client hosted model, the port that each client will be connecting to is already known, so the Winsock library can be initialised with this port before the game server data broadcasing begins. This is not the case in the peer to peer model since during the connection phase, each client would have initialised their UDP ports already to connect to the server and therefore this is alreay done. The main data broadcasting functionality in the game loop will differ slightly between the two models. The clients in the client hosted model, will only ever need to send information to the server so on every tick, only one message is sent. At each tick in the peer to peer model however, each client broadcasts the data to every other client in the game instance. This means that multiple messages have to be sent in the tick when more than 2 players are playing together.
+Another difference between the two implementations, is that the server broadcasts the public state of the simulation to every client, whilest this is not necessary in the peer to peer system as each update is received directly from the sending client.
 
 %fig:client_hosted_graph
 \input{fixtures/client_hosted_graph}
-\newpage
 
-
-\subsection{Peer to Peer data broadcasting}
-TODO similar to client and server but sends multiple messages instead of one.
-
-%fig:peer_to_peer_graph
+%fig:client-protocol_hosted_graph
 \input{fixtures/peer_to_peer_graph}
-\newpage
 
 
 \chapter{Implementation}
@@ -229,6 +222,11 @@ Before the start of the developement process, it is important to consider what r
 In this section, I will plan put how my code is intented to be called through classes that would be instanciated in the main program. I will outline what each function should do and what value it should return in successful and unsuccessful scenarios.
 
 
+\subsection{Error code constants}
+Whenever possible, each function that has a non-trival purpose (this does not apply to get and set functions), should return a signed integer value whenever possible. After calling the function, the return value can be checked and from this, it should be possible to determine if the function execution was successful or if and what error has occured. Generally, if the returned integer is a negative value, the function did not manage to complete what it was supposed to do, or the execution has not completed successfully. This negative value can be compared against known errors that can occur to determine what has happened. This set of expected outcomes will exist in a header file which will contain a different negative value for each error that can happen and a positive value for any other information that should be returned after a successful execution. For performance reasons, these values will be defined as \lstinline{#define} precompiler statemets.
+
+
+\newpage
 \subsection{Client hosted model connection}
 Fixtures \ref{code:server_conn} and \ref{code:client_conn} represent how I intend my library to be used to establish a connection between a client and server. The host of the game would be expected to run both the server and client code from the very start. The client on the host's instance is expected to be configured to connect to the server at the location of \lstinline{127.0.0.1}, meaning that they will be sending the request just like the other clients but to themselves. This implementation will allow for a client to choose to host a game without joining it if that is ever desired. The connection server should be started before any clients attempt to establish a connection with it. Both of these calls will block the current thread until the connection process is completed. No networking activity should be done until this is finished.
 
