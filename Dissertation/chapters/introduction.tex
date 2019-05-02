@@ -1,8 +1,8 @@
 \chapter{Introduction}
-Throughout this project, I will be exploring the different methods of providing a synchronised, multiplayer gaming experience on two or more computers on a network. I will be covering the networking basics of how two game clients running on seperate machines can communicate with each other as well as exploring the relevant details of how and why the networking systems in games are designed the way they are.
+Throughout this project, I will be exploring the different methods of providing a synchronised, multiplayer gaming experience on two or more computers on a network. I will be covering the networking basics of how two game clients running on separate machines can communicate with each other as well as exploring the relevant details of how and why the networking systems in games are designed the way they are.
 
 
-I will explore the existing methods of writing an online multiplayer game from scratch and aim to provide an implementation of a networking library for online games to communicate without a central server. I also aim to provide analysis of efficieny of different methods of achieving this goal.
+I will explore the existing methods of writing an online multiplayer game from scratch and aim to provide an implementation of a networking library for online games to communicate without a central server. I also aim to provide analysis of efficiency of different methods of achieving this goal.
 
 \section{Project Goals}
 When developing a multiplayer game the most important aspect of the codebase is likely to be the networking functionality and speed. In most games designed for two or more players interacting with each other or the environment, the whole experience can be ruined by slow or inefficient networking implementation. The most common way for games publishers/developers to address this, is to rent out servers space optimised for fast network speeds and a large amount of processing power. This allows each player to connect to a central known entity that can be trusted to be fast enough to handle the load of processing each simulation step and broadcasting information quickly. This solution provides many benefits in terms of security, cheating prevention and fairness, however it is an expensive investment and risk for games developed on a smaller budget.
@@ -12,8 +12,8 @@ I will be investigating other options that exist for the smaller budget projects
 \\
 Implementation goals:
 \begin{itemize}
-\item Implement a system that allows one client to act as a server for all others. Throughout this document, I will be refering to this as the \textbf{Client-Hosted} model.
-\item Implement a system for each client to send their updates to each other client directly. Throughout this document, I will be refering to this as the \textbf{Peer-to-Peer} model.
+\item Implement a system that allows one client to act as a server for all others. Throughout this document, I will be referring to this as the \textbf{Client-Hosted} model.
+\item Implement a system for each client to send their updates to each other client directly. Throughout this document, I will be referring to this as the \textbf{Peer-to-Peer} model.
 \end{itemize}
 Data gathering goals:
 \begin{itemize}
@@ -24,19 +24,19 @@ Data gathering goals:
 \newpage
 
 \section{Basic concepts and terminolory}
-First of all, I will define some basic concepts and terminolory that will be used throughout this document.
+First of all, I will define some basic concepts and terminology that will be used throughout this document.
 \\
 \\
 \textbf{Client}: Within the context of this document, a client can be defined as a piece of software responsible to running the game (i.e. game client). A client can also be defined as a computer interacting with a server, however it is possible to run two different instances of a game client on a single machine. This can also be described as a networking endpoint.
 \\
 \\
-\textbf{Online Multiplayer Game}: A video game can be defined as a simulation of a certain scenario that can be manipulated by the player of the game. When talking about online multiplayer games, it can be thought of as a simulation that runs on several clients connected by a network (e.g. LAN or the Internet) that is to be synchronised. When one player performs an action that effects the state of the simulation, this action should also be seen by all participants of this perticular simulation instance and therefore the simulation should remain in the same state across all participating clients. Due to the nature of this paper, when discussing games or simulations that use the network, it can be assumed that the given instance would be played by N > 1 participants.
+\textbf{Online Multiplayer Game}: A video game can be defined as a simulation of a certain scenario that can be manipulated by the player of the game. When talking about online multiplayer games, it can be thought of as a simulation that runs on several clients connected by a network (e.g. LAN or the Internet) that is to be synchronised. When one player performs an action that effects the state of the simulation, this action should also be seen by all participants of this particular simulation instance and therefore the simulation should remain in the same state across all participating clients. Due to the nature of this paper, when discussing games or simulations that use the network, it can be assumed that the given instance would be played by N > 1 participants.
 \\
 \\
 \textbf{Ping}: In network connections, the ping between different clients refers to the shortest amount of time that is needed for one client to send information to another and receive a response from this client. One client sends a ``ICMP echo request'' to another networked client (e.g. a game server). The receiving client, then responds with an ``ICMP echo reply'' back to the original device. The time between sending the request and receiving the reply, is the ping between the two clients.
 \\
 \\
-\textbf{Lag}: The grater the ping between two connected clients, the bigger the difference in the state of each clients' simulation once an action to be synchronised is performed. When a change is made by one client, this change should be seen by other clients participating in the same simulation and lag occurs when this change does not appear instentaneous to the user.
+\textbf{Lag}: The grater the ping between two connected clients, the bigger the difference in the state of each clients' simulation once an action to be synchronised is performed. When a change is made by one client, this change should be seen by other clients participating in the same simulation and lag occurs when this change does not appear instantneous to the user.
 \\
 \\
 \textbf{Jitter}: The difference in frequency that the messages are sent from a sender and received by the receiver. If a sending client sends packets at a constant rate, they would ideally arrive at the receiver's client at the same rate. This is not always the case however and could lead to some unwanted results in certain applications such as VOIP.
