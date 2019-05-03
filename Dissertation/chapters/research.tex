@@ -1,7 +1,10 @@
 \chapter{Background}
+This chapter explores the background knowledge that is associated with every other networking concept explored in this document. The next chapters will build upon the foundation that is esablished here and will use the understanding of the terminology and concepts to address some issues that are also identified here.
+
 
 \section{Networking principles in games}
-TODO: talk a bit about UDP, TCP/IP and routing...
+Whenever a message is sent over a computer network, there are many different protocols that are used at different stages of the message sending process. Most data that is sent over the internet, is sent over a protocol stack known as TCP/IP, which includes some useful functionalty such as the resending of packets if one doesnt arrive and the reconstruction of a message on the receiving client's end that makes sure the message arrives just as it was sent. While this process works great for content such as websites, the whole process adds a lot of time on top of the data transmission time of each packet. For data that needs to arrive at it's destination as quickly as possible, a more ``bare-bones'' protocol is available; UDP. This is a very simple idea of sending the information packet to it's destination and once it is sent, there is nothing else that the sender needs to do. The problem with sending a UDP packet, is that there is no guarantee when, or if, it will arrive at it's destination. There are many different factors that can cause a given data packet to time-out on it's way to the destination or arrive after taking a sub-optimal route there. The following section explains some potential problems that have to be considered when sending information over any computer network.
+
 
 \subsection{Communitaction Issues}
 In the dissertation \mycite{macedonia1995network}, the author has identified and grouped the most prevalent issues that occur in internet communications. In real time applications such as online games, these issues can be very impactful on the experience of the players.
