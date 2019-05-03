@@ -11,22 +11,17 @@
 \section{Peer to Peer model}
 \input{fixtures/p2p_attributes}
 
+\chapter{Developement Issues}
+\begin{figure}[!h]
+  \centering
+  \includegraphics[width=\textwidth]{GNAT/sending_too_fast.png}
+  \caption{Messages being broadcast with no delay}
+  \label{fig:broadcast_too_fast}
+\end{figure}
 
-\chapter{Experiment Result Graphs}
-
-\section{Jitter Experiment Graphs}
-TODO
-
-\subsection{1000ms delay}
-
-\subsection{500ms delay}
-
-\subsection{250ms delay}
-
-\subsection{125ms delay}
-
-\subsection{64ms delay}
-
-\subsection{8ms delay}
-
-\section{Variance Table}
+\begin{figure}[!h]
+  \centering
+  \includegraphics[width=\textwidth]{GNAT/sending_with_delay.png}
+  \caption{Messages being broadcast with delay}
+  \label{fig:broadcast_with_delay}
+\end{figure}
