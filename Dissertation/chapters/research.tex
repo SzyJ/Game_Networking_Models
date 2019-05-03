@@ -9,8 +9,8 @@ Whenever a message is sent over a computer network, there are many different pro
 \subsection{Communitaction Issues}
 In the dissertation \mycite{macedonia1995network}, the author has identified and grouped the most prevalent issues that occur in internet communications. In real time applications such as online games, these issues can be very impactful on the experience of the players.
 
-\subsubsection{Data Distribution}
-Broadcast to each client
+\subsubsection{Bandwidth}
+As \citeauthor{macedonia1995network} explains, ``the available network bandwidth, determines the size and richness of a Virtual Environment''. This is in relation to creating a networked virtual environment, however it also applies to any networking operation. The bandwidth of a network is the limit of how much data can travel through it. The bandwidth required grows exponentially as the size of a peer to peer network expands therefore if large simulations are being run on LAN, the bandwidth could become a limiting factor in that scenario.
 
 \subsubsection{Latency}
 The paper \mycite{bettner20011500}, documents the architecture and implementation of networking approaches in the RTS (Real Time Strategy) games ``Age of Empires'' 1 and 2. The authors talk about an experiment that has been performed with the game netcode where players were interviewed on whether they felt that their game inputs felt responsive at different latencies between the players. They have found that when playing with a latency of 250ms or less, the latency was not noticeable at all. Latencies between 250ms and 500ms were ``very playable''. Anything more than 500ms would start becoming noticeable. They have also found that when playing with a noticeable latency, the players have naturally developed a ``mental expectation of the lag'' between the inputs and an action happening. After developing this ``game pace'', they would enjoy playing the game at a consistent, slower response rather than altering between low and high latency.
@@ -19,11 +19,8 @@ What can be seen in this example, is that while making the latency between input
 
 
 \subsubsection{Reliability}
-UPD can lose packets........ The article \mycite{lincroft1999internet} documents the issues that the development team encountered when developing the netcode for the 1997 game ``X-Wing vs. TIE fighter''. The author has experimented with TCP connections in game data transmission and found that ``TCP refuses to deliver any of the other packets in the stream while it waits for the next "in order" packet. This is why we would see latencies in the 5-second range.'' and ``if a packet is having a tough time getting to its destination, TCP will actually stop re-sending it! The theory is that if packets are being dropped that it's due to congestion.''. The features that have been implemented into TCP to make it reliable, end up negatively effecting real-time application data traffic and due to the volume of data to be transmitted, should not be used for time sensitive data.
+When a packet is sent out into the network, there is no guarantee that it will be delivered. To fix this principle, the TCP protocol has been created that builds upon UDP. The article \mycite{lincroft1999internet} documents the issues that the development team encountered when developing the netcode for the 1997 game ``X-Wing vs. TIE fighter''. The author has experimented with TCP connections in game data transmission and found that ``TCP refuses to deliver any of the other packets in the stream while it waits for the next "in order" packet. This is why we would see latencies in the 5-second range.'' and ``if a packet is having a tough time getting to its destination, TCP will actually stop re-sending it! The theory is that if packets are being dropped that it's due to congestion.''. The features that have been implemented into TCP to make it reliable, end up negatively effecting real-time application data traffic and due to the volume of data to be transmitted, should not be used for time sensitive data.
 
-\subsubsection{Bandwidth}
-Consumer hardware and networking slow (esp upload)
-Talk about how MTU Works
 
 \subsection{Inconsistent ping between players}
 There are many different possible reasons for the lag to the server to vary widely from player to player. Firstly, it is possible that there are not enough servers throughout the world or that they are not spread out evenly enough across all regions. Players who live in geographically more remote locations, are likely to experience higher ping to servers compared to those that live in more densely populated cities due to where the servers are likely to be located. Secondly, there is no way of guaranteeing if the clients are going to be using a wired or a wireless connection to connect to the server. Wireless connections can be much slower and are more likely to introduce other potential problems such as packet loss.
@@ -70,7 +67,7 @@ The paper \mycite{Carter2009} provides an example of a game called ``Panzer Batt
 \chapter{Related work}
 The purpose of this chapter, is to investigate how networking is implemented in popular modern AAA games. To further the research in this topic, an analysis of the development process of using the networking tools available in the Unity game engine will be done.
 
-\section{Networking implementations in games}
+\section{Networking implementations in games}\label{sec:net_in_games}
 
 \subsection{Variable ping system in Battlefield 1} \label{sec:bf1_ping}
 An interesting approach to the issue of variable ping in a game has been implemented by DICE in the game Battlefield 1. Given 2 players; player A with a low ping to the server and player B with a ping of <150ms to the server.
@@ -138,16 +135,8 @@ All these issues could be fixed by implementing techniques designed for minimisi
 \input{fixtures/unet_images}
 \newpage
 
-\section{Related work summary}
+\section{Related work summary} \label{sec:related_work_sum}
 Most modern high-budget game releases include a competitve multiplayer mode that allow players to challenge their friends or compete with strangers over the internet. The advances in networking architecture allow for seamless multiplayer worlds such as those found in Destiny 2 and the heavily optimised experiences to make the game experiance ``feel'' responsive and fair with systems like those implemented in Battlefield 1 are often taken for granted. In fact, the only time an average consumer is likely to think about how netcode is implemented or the systems that come together to make the game feel fluid, is when a networking system is implemented poorly or a system fails in a given scenario. If the system is implemented well, it is not even noticed or thought about.
 
 This chapter has outlined some potential issues that can be encountered when designing netcode for unusual situations and how some netcode architects have tackled these issues. I have then done further research into how an existing network library works so that some insight from it's design can be used in the design of GNAT.
-From uning UNAT, I have found that through trying to make the library user friendly, the developers have made it hard to customise exactly what information should be synchronised. It was also difficult to use the library to send and receive custom messages, which could've been useful to address some of the experianced issues. In summary, UNET has succeeded in making itself easy to integrate into a project and get simple synchronisation working, however it was hard to customise what was synchronised.
-\\\\
-When designing the GNAT library, both the strengths and weaknesses of the UNAT library should be concidered. In an ideal world the GNAT library should be designed such that:
-\begin{itemize}
-\item It should be easy to set up and forget. (possibly it's own thread could be started that works in the background and keeps the data synchronised).
-\item It should be possible to send and receive a custom message packet at any stage in the program. (possibly a callback function could be provided that gets called whenever a given message is received)
-\item Some simulation items should be synchronised automatically. (pointers to struct fields could be given to update values in the struct when a given message is received from a client.)
-\end{itemize}
-Implementing all of this functionality will be out of scope for this project however these idead can act as blueprints for future enhancements.
+From uning UNAT, I have found that through trying to make the library user friendly, the developers have made it hard to customise exactly what information should be synchronised. It was also difficult to use the library to send and receive custom messages, which could've been useful to address some of the experianced issues. In summary, UNET has succeeded in making itself easy to integrate into a project and get simple synchronisation working, however it was hard to customise what was synchronised. When designing the GNAT library, both the strengths and weaknesses of the UNAT library should be concidered.

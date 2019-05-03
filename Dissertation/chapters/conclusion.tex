@@ -2,7 +2,7 @@
 
 
 
-\section{Testing my implementation}
+\section{Testing my implementation} \label{sec:testing}
 In order to keep tests fair, it is important to keep as much of the environment constant as possible between test iterations. Each iteration should have one variable that is changed so that the effects of this change can be easily observed and analysed. The following sections will outline the tests on how changing the volume of traffic that is sent between clients on a consumer network, effects the jitter with which the messages arrive.
 
 The test is set up using the client hosted model where the clients are connected to the network on both an ethernet connection and WiFi. The host is connected to the router over ethernet cables that go through a switch. One client that will connect to the host is started on the same machine as the server; this client will be refered to as the ``localhost client''. Another client is connected directly to the router and it will be refered to as the ``ethernet client''. The last client that will connect to the host, is a laptop that is close to the router and connected over WiFi, this will be refered to as the ``WiFi client''.
@@ -50,28 +50,58 @@ This chapter presents a conclusion of the project based on the aims and objectiv
 
 \item Implement the peer to peer and client hosted networking models as a C++ library.
   \\\\
-  TODO
+  The models' logic has been implemented into GNAT just as designed and the interface for using the current implementation is very simple.
+
+  Below is a list of the requirements that have been outlined for this project:
+
+  \begin{itemize}
+    \item Allow for choice between the peer to peer model or the client hosted model for programs using this code.
+\item The tick rate of data broadcasting should be configurable.
+\item The only requirement to using the functionality is to clone the library in a known location. Only one import should be needed.
+\item Every class that a user would interact with, should belong to a ``GNAT'' namespace.
+\end{itemize}
+
+Below is a list of descriptions about how each requirement has been achieved:
+\begin{itemize}
+\item The requirement no.1, has been met. The command line application developed alongside this project uses GNAT and allows the user to choose which networking model to use.
+
+\item The requirement no. 2, has been met as the testing performed in section \ref{sec:testing}, relies on the configurable tickrate.
+
+\item The requirement no. 3, has been partially met. The source code successfully compiles into a static library file (GNAT\_Core.lib) however the usage of the library, differs slightly. Depending on what networking model is used, either ``peer.h'', ``client.h'' or ``server.h'' has to be included in the project. This only ends up using the necessary classes which should help with compile time on applications that use the library correctly.
+
+\item The requirement no. 4, has been met successfully, a user using the library has to correctly use the namespace when refering to a GNAT object. This is important as it provides code clarity if there are several object with a similar name.
+\end{itemize}
+
 
 \item Investigate issues spawned from computer network communication using the implemented networking models in the GNAT library.
   \\\\
-  TODO
+  The investigation into the effect on varience that increasing the server tickrate has, provided some insightful data.
 \end{enumerate}
 
 
-
-
-
 \section{What has been established and what could be done further}
-TODO
+Throughout the document, the main issues that are encountered when developing real-time, network applications, have been well established and documented. The research into the different methods of mitigating these issues have also been well researched.
+
+Through the investigation of the modern game netcode that has been documented in the section \ref{sec:net_in_games} and beyond, it can be concluded that the most popular networking model design for games that wish to avoid a dedicated game server, is a peer to peer system with some elements of the game being moved to a client hosted server hosted by one of the peers. The state of this server is cloned periodically but the local copy is not respected and is only useful when a host migration has to occur. If a game is designed in ``zones'' that allow a player can freely enter and leave, the host migration system can be designed in such a way that as the player approaches another ``zone'', the migration process begins such that when the playe fully leaves, the game does not have to pause to allow for this system to take place.
 
 
 \section{What went well}
-TODO
+The investigation into netcode of popular games has proven to provide a lot of insight into the time of challenges that are encountered and how they can be overcome. Also, the design and implementation of the GNAT library, though not easy, has proved to be an enjoyable challenge and an invaluable learning experence.
 
 
 \section{What could have been done better}
-TODO
+More experiments could have been performed with more varied scenarios. Some examples include:
+\begin{itemize}
+\item Comparing the bandwidth usage between client hosted and peer to peer models.
+\item Analysis of performance of my library and how it could be made more efficient.
+\end{itemize}
 
 
 \section{What can be done in the future}
-TODO
+There are many potential improvements that could be done to build upon the foundation that have been laid out in this project through the GNAT library. Potental improvements (which have been identified in the section \ref{sec:related_work_sum}) include:
+\begin{itemize}
+\item It should be easier to configure the server and port address when using the library. (Ideally, the connection server configuration should be configurable during runtime)
+\item The library should be easy to set up and forget. (possibly it's own thread could be started that works in the background and keeps the data synchronised).
+\item It should be possible to send and receive a custom message packet at any stage in the program. (possibly a callback function could be provided that gets called whenever a given message is received)
+\item Some simulation items should be synchronised automatically. (pointers to struct fields could be given to update values in the struct when a given message is received from a client.)
+\end{itemize}
