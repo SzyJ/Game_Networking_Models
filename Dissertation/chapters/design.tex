@@ -216,18 +216,18 @@ Before the start of the development process, it is important to consider what re
 \textbf{What is out of scope for the current implementation of GNAT?}
 \begin{enumerate}
 \item Send arbitrary packet payloads. This implementation is designed to test latency and jitter in UDP packets. Dealing with unexpected data and how the data in messages effects the program state is therefore out of scope. It should however be possible to send different values over in the packet payload to be able to differentiate one packet from another.
-\item Perform version checks. In a real-world scenario, it is always beneficial to ensure that all clients communicating with another are updated to the same version to ensure compatability and avoid unexpected state.
+\item Perform version checks. In a real-world scenario, it is always beneficial to ensure that all clients communicating with another are updated to the same version to ensure compatibility and avoid unexpected state.
 \item Implement functionality intended for message jitter mitigation such as ``Dead Reckoning''. This kind of logic belongs more as part of the game's data processing implementation than a library purely used for sending packets.
 \item Functionality for dealing with packet loss such as a cycling packet counter or the previous packet's payload.
-\item Implement anti-cheat functionality such as spoofing source ip address of a packet to pretend to be another client.
+\item Implement anti-cheat functionality such as spoofing source IP address of a packet to pretend to be another client.
 \end{enumerate}
 
 \newpage
 \section{Interfaces and usage}
-The classes that are intended for a user of the GNAT library to instanciate in their code, will have public functions that will perform the networking logic associated with the model in use. In this section, the intended use for these functions is planned out along with their actions and return values.
+The classes that are intended for a user of the GNAT library to instantiate in their code, will have public functions that will perform the networking logic associated with the model in use. In this section, the intended use for these functions is planned out along with their actions and return values.
 
 \subsection{Error code constants}
-Whenever possible, each function that has a non-trivial purpose (this does not apply to get and set functions), should return a signed integer value whenever possible. After calling the function, the return value can be checked and from this, it should be possible to determine if the function execution was successful or if and what error has occurred. Generally, if the returned integer is a negative value, the function did not manage to complete what it was supposed to do, or the execution has not completed successfully. This negative value can be compared against known errors that can occur to determine what has happened. This set of expected outcomes will exist in a header file which will contain a different negative value for each error that can happen and a positive value for any other information that should be returned after a successful execution. For performance reasons, these values will be defined as \lstinline{#define} precompiler statements. An exmaple of implementation of this idea can be seen in figure \ref{fig:error_codes}.
+Whenever possible, each function that has a non-trivial purpose (this does not apply to get and set functions), should return a signed integer value whenever possible. After calling the function, the return value can be checked and from this, it should be possible to determine if the function execution was successful or if and what error has occurred. Generally, if the returned integer is a negative value, the function did not manage to complete what it was supposed to do, or the execution has not completed successfully. This negative value can be compared against known errors that can occur to determine what has happened. This set of expected outcomes will exist in a header file which will contain a different negative value for each error that can happen and a positive value for any other information that should be returned after a successful execution. For performance reasons, these values will be defined as \lstinline{#define} precompiler statements. An example of implementation of this idea can be seen in figure \ref{fig:error_codes}.
 
 \begin{figure}[!h]
   \centering
