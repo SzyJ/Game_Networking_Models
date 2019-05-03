@@ -25,3 +25,186 @@
   \caption{Messages being broadcast with delay}
   \label{fig:broadcast_with_delay}
 \end{figure}
+
+\chapter{GNAT Code Snippets}
+
+\section{Pre-compiled Headers}
+When developing a project that uses code that will not change, such as the std library and winsock, it is inefficient to compile the code for these libraries every time the project code is compiled. To greatly improve compile times, precompiled headers are used.
+
+\textbf{pch.h}
+\begin{lstlisting}
+// General
+#include <string>
+#include <iostream>
+#include <thread>
+
+// Data Structures
+#include <map>
+#include <vector>
+
+// WinSock
+#include <winsock2.h>
+#include <Ws2tcpip.h>
+#include <windows.h>
+
+#pragma comment (lib, "ws2_32.lib")
+
+// Custom
+#include "log.h"
+\end{lstlisting}
+
+\textbf{pch.cpp}
+\begin{lstlisting}
+#include "pch.h"
+\end{lstlisting}
+
+
+
+
+
+
+
+\section{Logging library wrapper}
+For the logging library, a 3rd party project was used called spdlog. The wrapper is used to use this library in predefined ways.
+
+
+\textbf{Log.h}
+\begin{lstlisting}
+#pragma once
+#include <memory>
+#include <spdlog/spdlog.h>
+
+namespace GNAT {
+	class GNAT_Log {
+	public:
+		static void init();
+		static void init_client();
+		static void init_server();
+		static void init_peer();
+		static void init_connection();
+
+		inline static std::shared_ptr<spdlog::logger>& getConnectionLogger() { return connection_logger; }
+		inline static std::shared_ptr<spdlog::logger>& getServerLogger() { return server_logger; }
+		inline static std::shared_ptr<spdlog::logger>& getPeerLogger() { return peer_logger; }
+		inline static std::shared_ptr<spdlog::logger>& getClientLogger() { return client_logger; }
+
+	private:
+		const static int LOG_FILE_SIZE_IN_MB = 5;
+		const static int ROTATING_FILE_COUNT = 3;
+
+		static std::shared_ptr<spdlog::logger> connection_logger;
+		static std::shared_ptr<spdlog::logger> server_logger;
+		static std::shared_ptr<spdlog::logger> peer_logger;
+		static std::shared_ptr<spdlog::logger> client_logger;
+	};
+}
+
+// Loging Macros
+#define CONNECT_LOG_FATAL(...) GNAT::GNAT_Log::getConnectionLogger()->fatal(__VA_ARGS__); std::cout << "  " << __VA_ARGS__ << std::endl
+#define CONNECT_LOG_ERROR(...) GNAT::GNAT_Log::getConnectionLogger()->error(__VA_ARGS__); std::cout << "  " << __VA_ARGS__ << std::endl
+#define CONNECT_LOG_WARN(...) GNAT::GNAT_Log::getConnectionLogger()->warn(__VA_ARGS__);	 std::cout << "  " << __VA_ARGS__ << std::endl
+#define CONNECT_LOG_INFO(...) GNAT::GNAT_Log::getConnectionLogger()->info(__VA_ARGS__);	 std::cout << "  " << __VA_ARGS__ << std::endl
+#define CONNECT_LOG_TRACE(...) GNAT::GNAT_Log::getConnectionLogger()->trace(__VA_ARGS__); std::cout << "  " << __VA_ARGS__ << std::endl
+
+#define SERVER_LOG_FATAL(...) GNAT::GNAT_Log::getServerLogger()->fatal(__VA_ARGS__); std::cout << "  " << __VA_ARGS__ << std::endl
+#define SERVER_LOG_ERROR(...) GNAT::GNAT_Log::getServerLogger()->error(__VA_ARGS__); std::cout << "  " << __VA_ARGS__ << std::endl
+#define SERVER_LOG_WARN(...) GNAT::GNAT_Log::getServerLogger()->warn(__VA_ARGS__);	 std::cout << "  " << __VA_ARGS__ << std::endl
+#define SERVER_LOG_INFO(...) GNAT::GNAT_Log::getServerLogger()->info(__VA_ARGS__);	 std::cout << "  " << __VA_ARGS__ << std::endl
+#define SERVER_LOG_TRACE(...) GNAT::GNAT_Log::getServerLogger()->trace(__VA_ARGS__); std::cout << "  " << __VA_ARGS__ << std::endl
+
+#define PEER_LOG_FATAL(...) GNAT::GNAT_Log::getPeerLogger()->fatal(__VA_ARGS__);	 std::cout << "  " << __VA_ARGS__ << std::endl
+#define PEER_LOG_ERROR(...) GNAT::GNAT_Log::getPeerLogger()->error(__VA_ARGS__);	 std::cout << "  " << __VA_ARGS__ << std::endl
+#define PEER_LOG_WARN(...) GNAT::GNAT_Log::getPeerLogger()->warn(__VA_ARGS__);		 std::cout << "  " << __VA_ARGS__ << std::endl
+#define PEER_LOG_INFO(...) GNAT::GNAT_Log::getPeerLogger()->info(__VA_ARGS__);		 std::cout << "  " << __VA_ARGS__ << std::endl
+#define PEER_LOG_TRACE(...) GNAT::GNAT_Log::getPeerLogger()->trace(__VA_ARGS__);	 std::cout << "  " << __VA_ARGS__ << std::endl
+
+#define CLIENT_LOG_FATAL(...) GNAT::GNAT_Log::getClientLogger()->fatal(__VA_ARGS__); std::cout << "  " << __VA_ARGS__ << std::endl
+#define CLIENT_LOG_ERROR(...) GNAT::GNAT_Log::getClientLogger()->error(__VA_ARGS__); std::cout << "  " << __VA_ARGS__ << std::endl
+#define CLIENT_LOG_WARN(...) GNAT::GNAT_Log::getClientLogger()->warn(__VA_ARGS__);	 std::cout << "  " << __VA_ARGS__ << std::endl
+#define CLIENT_LOG_INFO(...) GNAT::GNAT_Log::getClientLogger()->info(__VA_ARGS__);	 std::cout << "  " << __VA_ARGS__ << std::endl
+#define CLIENT_LOG_TRACE(...) GNAT::GNAT_Log::getClientLogger()->trace(__VA_ARGS__); std::cout << "  " << __VA_ARGS__ << std::endl
+\end{lstlisting}
+
+\textbf{Log.cpp}
+
+\begin{lstlisting}
+#include "pch.h"
+#include "log.h"
+#include <spdlog/sinks/rotating_file_sink.h>
+#include <ctime>
+
+namespace GNAT {
+	std::shared_ptr<spdlog::logger> GNAT_Log::connection_logger;
+	std::shared_ptr<spdlog::logger> GNAT_Log::server_logger;
+	std::shared_ptr<spdlog::logger> GNAT_Log::peer_logger;
+	std::shared_ptr<spdlog::logger> GNAT_Log::client_logger;
+
+	void GNAT_Log::init() {
+		spdlog::set_pattern("%^[%T] %n: %v%$");
+
+		try
+		{
+			peer_logger = spdlog::rotating_logger_mt("CONN", "Logs\\CONN-" + std::to_string(std::time(0)) + ".log", 1024 * 1024 * LOG_FILE_SIZE_IN_MB, ROTATING_FILE_COUNT);
+			server_logger = spdlog::rotating_logger_mt("SERV", "Logs\\SERV-" + std::to_string(std::time(0)) + ".log", 1024 * 1024 * LOG_FILE_SIZE_IN_MB, ROTATING_FILE_COUNT);
+			peer_logger = spdlog::rotating_logger_mt("PEER", "Logs\\PEER-" + std::to_string(std::time(0)) + ".log", 1024 * 1024 * LOG_FILE_SIZE_IN_MB, ROTATING_FILE_COUNT);
+			client_logger = spdlog::rotating_logger_mt("CLNT", "Logs\\CLNT-" + std::to_string(std::time(0)) + ".log", 1024 * 1024 * LOG_FILE_SIZE_IN_MB, ROTATING_FILE_COUNT);
+		}
+		catch (const spdlog::spdlog_ex& ex)
+		{
+			std::cout << "Log initialization failed: " << ex.what() << std::endl;
+		}
+	}
+
+	void GNAT_Log::init_client() {
+		spdlog::set_pattern("%^[%T] %n: %v%$");
+
+		try
+		{
+			client_logger = spdlog::rotating_logger_mt("CLNT", "Logs\\CLNT-" + std::to_string(std::time(0)) + ".log", 1024 * 1024 * LOG_FILE_SIZE_IN_MB, ROTATING_FILE_COUNT);
+		}
+		catch (const spdlog::spdlog_ex& ex)
+		{
+			std::cout << "Log initialization failed: " << ex.what() << std::endl;
+		}
+	}
+
+	void GNAT_Log::init_server() {
+		spdlog::set_pattern("%^[%T] %n: %v%$");
+
+		try
+		{
+			server_logger = spdlog::rotating_logger_mt("SERV", "Logs\\SERV-" + std::to_string(std::time(0)) + ".log", 1024 * 1024 * LOG_FILE_SIZE_IN_MB, ROTATING_FILE_COUNT);
+		}
+		catch (const spdlog::spdlog_ex& ex)
+		{
+			std::cout << "Log initialization failed: " << ex.what() << std::endl;
+		}
+	}
+
+	void GNAT_Log::init_peer() {
+		spdlog::set_pattern("%^[%T] %n: %v%$");
+
+		try
+		{
+			peer_logger = spdlog::rotating_logger_mt("PEER", "Logs\\PEER-" + std::to_string(std::time(0)) + ".log", 1024 * 1024 * LOG_FILE_SIZE_IN_MB, ROTATING_FILE_COUNT);
+		}
+		catch (const spdlog::spdlog_ex& ex)
+		{
+			std::cout << "Log initialization failed: " << ex.what() << std::endl;
+		}
+	}
+
+	void GNAT_Log::init_connection() {
+		spdlog::set_pattern("%^[%T] %n: %v%$");
+
+		try
+		{
+			connection_logger = spdlog::rotating_logger_mt("CONN", "Logs\\CONN-" + std::to_string(std::time(0)) + ".log", 1024 * 1024 * LOG_FILE_SIZE_IN_MB, ROTATING_FILE_COUNT);
+		}
+		catch (const spdlog::spdlog_ex& ex)
+		{
+			std::cout << "Log initialization failed: " << ex.what() << std::endl;
+		}
+	}
+}
+\end{lstlisting}
