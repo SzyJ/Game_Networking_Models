@@ -1,7 +1,7 @@
 \chapter{Design}
 
 \section{Protocols}
-During any connection that can be deployed between several processes on a machine or even different physical hardware in separate geographical locations, many different protocols come into play. In this section, I will investigate the different methods of transferring data over the Internet and discuss the choices that have to be made in the design of my own protocol to allow for different clients connecting to each other and sending data.
+During any connection that can be deployed between several processes on a machine or even different physical hardware in separate geographical locations, many different protocols come into play. In this section, different methods of transferring data over the Internet will be will investigated and the choices made for custom protocols in the GNAT library will be discussed.
 
 \subsection{Protocols in Network Communications}
 Firstly, in the network layer, most commonly the IP\footnote{IP: Internet Protocol} is employed however other options such as X.25 are also available but have more niche uses. These protocols are responsible for ``packaging'' the data to be sent between two different computers identified by their IP address. The packet from the sending machine, will travel through a network of routers that will eventually lead it to the machine with the IP address of the receiving machine.
@@ -14,7 +14,7 @@ The next layer of protocols is the operating system interface or library, that i
 \subsection{Connecting the clients together} \label{sec:client_connections}
 When connecting multiple clients together, no matter what model is used, the session host or the server will need to know what clients will participate in this game session. A brute force solution to this would be to hard code all the information that is needed by each of the participating parties. This solution presents many flaws however. The configuration on each client would have to be configured before the first run on each new participant, as well as when a different connection pattern is wanted. While this solution would be simplest, the issues associated with connecting new clients and synchronising multiple configuration files for the system to work together, make this infeasible.
 A common solution used in the industry is to use something known as a matchmaking server. This is a separate server with a publicly known IP address, that would be tasked with listening in for join messages from clients and finding the best matches of players based on many different factors such as ping to the game server or player skill. The information about each client would then be passed onto the game server for the processing to start. The matchmaking idea provides many advantages including taking away the computation associated with connecting from the main gameplay server however when developing a networking solution without a central server, this defeats the point.
-The most appropriate solution that I have found, combines both ideas. Firstly, there will need to be a way for the user to define what the address of the server or session host peer is. This can be done through a configuration file or getting an input from the user. With the server address known, each client can send a message to that address requesting to join a game. The client receiving this information, would essentially act as a matchmaking server and after getting requests to join from enough players, the game could start.
+What could be considered the most appropriate solution, combines both ideas. Firstly, there will need to be a way for the user to define what the address of the server or session host peer is. This can be done through a configuration file or getting an input from the user. With the server address known, each client can send a message to that address requesting to join a game. The client receiving this information, would essentially act as a matchmaking server and after getting requests to join from enough players, the game could start.
 
 \subsubsection{Design of the matchmaking server}
 While the basic need for operation of the matchmaking server is slightly different for client hosted and Peer to Peer models, they will also share a lot of logic and functionality. Below is the basic flow of operation for this server.
@@ -31,7 +31,7 @@ While the basic need for operation of the matchmaking server is slightly differe
   \end{enumerate}
 \end{enumerate}
 
-I have experimented with different approaches for implementing this flow. Initially, for simplicity, the implementation consisted only of UDP messages being sent between clients. This means that only one UDP port had to be opened and therefore the same port that is used for the connection logic, would be used for the communication with the game server. After inspecting the solution, I have found that due to the nature of UDP messages, some aspects of this implementation could be volatile and leave the program in a unexpected state. If a ``Join Request'' message was not delivered, no acknowledgement message would be received and therefore a timeout waiting system would have to be implemented to resend the join message or the system would be waiting for an acknowledgement for ever. A larger issue could arise however, if the acknowledgement message is not delivered. When the server receives the join message, this client would be added to the server's memory and therefore it would be assumed that the player would be in the game. However, if the player is still waiting for an acknowledgement and the game starts, this player would not know that they are actually in the game. To solve this issue, we could introduce an acknowledgement message for the acknowledgement however as these changes are being made, we are just fixing the intrinsic unreliability of the UDP protocol.
+Several different approaches for implementing this flow have been implemented and experimented with. Initially, for simplicity, the implementation consisted only of UDP messages being sent between clients. This means that only one UDP port had to be opened and therefore the same port that is used for the connection logic, would be used for the communication with the game server. After inspecting the solution, it turned out that due to the nature of UDP messages, some aspects of this implementation could be volatile and leave the program in a unexpected state. If a ``Join Request'' message was not delivered, no acknowledgement message would be received and therefore a timeout waiting system would have to be implemented to resend the join message or the system would be waiting for an acknowledgement for ever. A larger issue could arise however, if the acknowledgement message is not delivered. When the server receives the join message, this client would be added to the server's memory and therefore it would be assumed that the player would be in the game. However, if the player is still waiting for an acknowledgement and the game starts, this player would not know that they are actually in the game. To solve this issue, we could introduce an acknowledgement message for the acknowledgement however as these changes are being made, we are just fixing the intrinsic unreliability of the UDP protocol.
 The obvious solution to the issues that have been encountered here, is to use the TCP protocol which exists because it has already fixed the issues addressed here.
 The revised outcome of the architecture of the matchmaking server, would work in a similar way to the previous design but the TCP protocol would be used. This forces us to implement some changes to the messages that we are expecting to receive from the clients. Firstly, since the set of TCP ports and UDP ports does not overlap (i.e. TCP port 4500 is a completely different port to UDP port 4500), the connection server will need to know what UDP port has been opened by each client. This means that alongside the Join Request message, the clients will need to send the port that the game server will use to send messages. We can still use the source address of the message to know the IP address. With the TCP protocol guaranteeing that no messages are dropped, we can safely assume that each client will get all the information from the server and all clients can proceed to the game loop together. As a result of implementing a TCP server connection, this now means that each client will also have to implement logic for connecting to the server with TCP.
 Overall, this is a much better solution to the original design as the code for the game logic and connection logic, is more logically organised in separate classes.
@@ -173,10 +173,10 @@ Another difference between the two implementations, is that the server broadcast
 
 
 \chapter{Implementation}
-I will be writing a simple implementation for the client hosted and peer to peer networking models in C++ using the Winsock library for networking. The goal with this project is to gain insight into how networking systems are implemented in real time applications and identify potential implementation pitfalls for such a system. Alongside the networking logic, I will write a console application that allows me to open several instances of itself to test message transporting between them. This console application will make use of my networking implementations and therefore allow me to easily test my networking functionality as I implement it.
+This chapter documents the implementation for the client hosted and peer to peer networking models in C++ using the Winsock library for the GNAT library. Aside from developing the library, the goal with this project is to gain insight into how networking systems are implemented in real-time applications and identify potential implementation pitfalls for such a system. Alongside the networking logic, a simple console application will be produced that will allow users to open several instances of it to test message sending between them. This console application will make use of the GNAT library networking implementations and therefore allow for easy testing of the networking functionality during development.
 
 \section{Tools and Technologies}
-I have identified what technologies I want to use for this project. In this section, I will be analysing each one and provide alternatives that I could have used instead.
+Here, the technologies that will be used for this project are identified and analysed.
 
 \subsection{Why C++}
 There are many programming languages available today, each with it's own strengths and weaknesses, each with a purpose that it was designed for. By nature, some languages are more appropriate for some tasks over others and weighing out the pros and cons is important when making a decision of what language to use for a project.
@@ -194,33 +194,37 @@ Another advantage of the Windows platform is the system manager that clearly dis
 
 
 \subsection{Why the Winsock library}
-Winsock is a C++ networking library developed by Microsoft based on the BSD sockets API. There are many similarities between the BSD and Microsoft implementations and most of the functions share a signature, meaning that a Windows implementation can be easily adapted to work on Unix systems, with little modifications. Since most of my networking and message management logic will be implemented by me, I will only be using Winsock for establishing TCP connections and sending simple packets. These simple requirements, can be satisfied by any networking library so the choice of Winsock was largely arbitrary. An advantages that Winsock has over other libraries however, include very detailed and well written documentation and example library and the fact that it is being maintained by Microsoft, who also maintains Windows. The large collection of examples allowed me to make a quick start with Winsock and the mechanisms for sending and receiving packets were very easily implemented.
+Winsock is a C++ networking library developed by Microsoft based on the BSD sockets API. There are many similarities between the BSD and Microsoft implementations and most of the functions share a signature, meaning that a Windows implementation can be easily adapted to work on Unix systems, with little modifications. Since most of my networking and message management logic will be implemented from scratch, Winsock will only be used for establishing TCP connections and sending simple packets. These simple requirements, can be satisfied by any networking library so the choice of Winsock was largely arbitrary. Examples of advantages that Winsock has over other libraries however, include very detailed and well written documentation and examples as well as the fact that it is being maintained by Microsoft, who also maintains Windows. The large collection of examples allows for a quick start with Winsock and the mechanisms for sending and receiving packets were very easily implemented.
 
 
 \newpage
 \section{Application Specifications}
-Before the start of the development process, it is important to consider what requirements the end product should and should not be able to fulfill. This will outline the scope of the project and determine what will be out of development scope due to time constraints. Alongside the networking code, I intend to also develop a commandline application that allows me to issue commands that will call public functions in my library. This application will allow me to test that my code does what I expect as the development progresses and allow me to perform tests on the final product.
+Before the start of the development process, it is important to consider what requirements the end product should and should not be able to fulfill. This will outline the scope of the project and determine what will be out of development scope due to time constraints. Alongside the networking code, a commandline application will also be developed. This application will allow the user to issue commands that will call public functions in the GNAT library. This application will allow for easy testing during the development process and will also be used to execute tests on final product.
 \\
 \\
-\textbf{What the application should be able to do?}
+\textbf{What should GNAT be able to do?}
 \begin{enumerate}
 \item Allow for choice between the peer to peer model or the client hosted model for programs using this code.
+  \begin{enumerate}
+  \item In the client hosted model, the server should broadcast state at a constant pace and listen to update messages from clients. The clients should listen for the server's state broadcast and be able to send update packets.
+    \item In the peer to peer model, each client should be able to broadcast an update message to all clients and listen for update messages from other peers.
+  \end{enumerate}
 \item The tick rate of data broadcasting should be configurable.
 \item The only requirement to using the functionality is to clone the library in a known location. Only one import should be needed.
-\item Every class that a user would interact with, should belong to the same namespace.
+\item Every class that a user would interact with, should belong to a ``GNAT'' namespace.
 \end{enumerate}
-\textbf{What the application should not be able to do?}
+\textbf{What is out of scope for the current implementation of GNAT?}
 \begin{enumerate}
 \item Send arbitrary packet payloads. This implementation is designed to test latency and jitter in UDP packets. Dealing with unexpected data and how the data in messages effects the program state is therefore out of scope. It should however be possible to send different values over in the packet payload to be able to differentiate one packet from another.
-\item Requirement
-\item Requirement
-\item Requirement
+\item Perform version checks. In a real-world scenario, it is always beneficial to ensure that all clients communicating with another are updated to the same version to ensure compatability and avoid unexpected state.
+\item Implement functionality intended for message jitter mitigation such as ``Dead Reckoning''. This kind of logic belongs more as part of the game's data processing implementation than a library purely used for sending packets.
+\item Functionality for dealing with packet loss such as a cycling packet counter or the previous packet's payload.
+\item Implement anti-cheat functionality such as spoofing source ip address of a packet to pretend to be another client.
 \end{enumerate}
 
 \newpage
 \section{Interfaces and usage}
-In this section, I will plan put how my code is intended to be called through classes that would be instantiated in the main program. I will outline what each function should do and what value it should return in successful and unsuccessful scenarios.
-
+The classes that are intended for a user of the GNAT library to instanciate in their code, will have public functions that will perform the networking logic associated with the model in use. In this section, the intended use for these functions is planned out along with their actions and return values.
 
 \subsection{Error code constants}
 Whenever possible, each function that has a non-trivial purpose (this does not apply to get and set functions), should return a signed integer value whenever possible. After calling the function, the return value can be checked and from this, it should be possible to determine if the function execution was successful or if and what error has occurred. Generally, if the returned integer is a negative value, the function did not manage to complete what it was supposed to do, or the execution has not completed successfully. This negative value can be compared against known errors that can occur to determine what has happened. This set of expected outcomes will exist in a header file which will contain a different negative value for each error that can happen and a positive value for any other information that should be returned after a successful execution. For performance reasons, these values will be defined as \lstinline{#define} precompiler statements.
@@ -228,7 +232,7 @@ Whenever possible, each function that has a non-trivial purpose (this does not a
 
 \newpage
 \subsection{Client hosted model connection}
-Fixtures \ref{code:server_conn} and \ref{code:client_conn} represent how I intend my library to be used to establish a connection between a client and server. The host of the game would be expected to run both the server and client code from the very start. The client on the host's instance is expected to be configured to connect to the server at the location of \lstinline{127.0.0.1}, meaning that they will be sending the request just like the other clients but to themselves. This implementation will allow for a client to choose to host a game without joining it if that is ever desired. The connection server should be started before any clients attempt to establish a connection with it. Both of these calls will block the current thread until the connection process is completed. No networking activity should be done until this is finished.
+Fixtures \ref{code:server_conn} and \ref{code:client_conn} represent how GNAT is intended to be used to establish a connection between a client and server. The host of the game would be expected to run both the server and client code from the very start. The client on the host's instance is expected to be configured to connect to the server at the location of \lstinline{127.0.0.1}, meaning that they will be sending the request just like the other clients but to themselves. This implementation will allow for a client to choose to host a game without joining it if that is ever desired. The connection server should be started before any clients attempt to establish a connection with it. Both of these calls will block the current thread until the connection process is completed. No networking activity should be done until this is finished.
 
 % code:server_conn
 % code:client_conn
@@ -237,7 +241,7 @@ Fixtures \ref{code:server_conn} and \ref{code:client_conn} represent how I inten
 
 \newpage
 \subsection{Client hosted model game loop}
-Fixtures \ref{code:server_game} and \ref{code:client_game} represent how I intend my library to be used to start the main game loop responsible for sharing data between server and client. Both will start two threads; one for listening for data and one for sending data. These functions should not be called before a connection has been established between the server and the clients and a non-negative error code returned from the connection functions.
+Fixtures \ref{code:server_game} and \ref{code:client_game} represent how the GNAT library is intended to be used to start the main game loop responsible for sharing data between server and client. Both will start two threads; one for listening for data and one for sending data. These functions should not be called before a connection has been established between the server and the clients and a non-negative error code returned from the connection functions.
 
 % code:server_game
 % code:client_game
@@ -246,7 +250,7 @@ Fixtures \ref{code:server_game} and \ref{code:client_game} represent how I inten
 
 \newpage
 \subsection{Peer to peer model connection}
-Figures \ref{code:peer_conn_host} and \ref{code:peer_conn_join} represent how I intend my library to be used with a game using a peer to peer model. Hosting the game as session host, should automatically add them as one of the clients in the connection process so no other networking thread needs to be started. Both of these calls will block the current thread until the connection process has finished.
+Figures \ref{code:peer_conn_host} and \ref{code:peer_conn_join} represent how the GNAT library is intended to be used with a game using a peer to peer model. Hosting the game as session host, should automatically add them as one of the clients in the connection process so no other networking thread needs to be started. Both of these calls will block the current thread until the connection process has finished.
 
 % code:peer_conn_host
 % code:peer_conn_join

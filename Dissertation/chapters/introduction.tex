@@ -16,6 +16,7 @@ An alternative for developers who do not have the budget, or find game servers t
 
 \section{Project Purpose}
 Most AAA games that are released to the modern game market, have gameplay features that utilise internet functionality. This type of network integration ranges from, giving the player an in-game option and showing them how many players have chosen a given choice (an example of this can be seen below in the game Life is Strange by Square Enix) to multiplayer-only reaction-based competitive gameplay (for example a screenshot from Ovewatch by Blizzard can be found below).
+
 \begin{figure}[!h]
   \centering
 \subfloat[Screenshot of choices in Life is Strange. Image from: IGN]{
@@ -49,8 +50,9 @@ These aims can be devided into three seperate objectives:
   \\\\
   The focus of this project is on server-less, real-time networking. Two commonly used strategies, that are used in the industry to support this idea, have been identified; peer to peer and client hosting. Both startegies strive for the same goal, however fundamentally employ different methods of achieving this.
   The workings of each model's networking logic, will be implemented from scratch so that any configurable variables can be easily controlled and any unnecessary bloat, unrelated to this project's investigation, does not effect the results.
+  From this point onwards, the name used to refer to this project will be the ``GNAT (Game Networking API Template)'' library.
 
-\item Investigate issues spawned from computer network communication using the implemented networking models in my library.
+\item Investigate issues spawned from computer network communication using the implemented networking models in the GNAT library.
   \\\\
   When sending packets during any computer network communication, many things have to be considered. Firstly, any transfer of information can never be instant; there is always some kind of delay. Secondly, without external systems in place, there is no guarantee that any given message packet has arrived at it's intended destination. It is possible that a valid route could not be found or the packet was intercepted. Finally, even if a packet does successfully arrive at it's intended destination, it is impossible to accurately predict the amount of time that this has taken. It is possible that messages sent at a constant rate arrive at the destination sparadically or even out of order to which they were sent in.
   Any one of these properties of computer network communications can have negative effects on both the application sending and receiving any information. These properties will be analysed for when they can occur and how they can be dealt with.

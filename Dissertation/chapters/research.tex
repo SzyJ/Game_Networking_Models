@@ -32,7 +32,7 @@ Varying ping between players could lead to a problem of a poor experience for a 
 
 
 \subsubsection{Possible solutions to the variable ping problem}
-Netcode developers of the most popular games, have tried many different solutions to fix or at least mitigate the issue of widely differing ping to the game server between players. One example of a solution here could be ``region locking''. This is the idea that only players with equally low ping, can connect to the same game instance on a server. This could be done by providing game servers spread out across as many geographical regions as possible and only allow players to connect to their local one. This presents two main issues however. Firstly, this prevents players in different geographical regions from playing together and therefore separates the community. Also, the issue of players in remote areas playing together and having a suboptimal experience due to the server lag, has not been addressed. The developers of Battlefield 1 have implemented an interesting solution to this problem and I will discuss this further on in Section \ref{sec:bf1_ping}.
+Netcode developers of the most popular games, have tried many different solutions to fix or at least mitigate the issue of widely differing ping to the game server between players. One example of a solution here could be ``region locking''. This is the idea that only players with equally low ping, can connect to the same game instance on a server. This could be done by providing game servers spread out across as many geographical regions as possible and only allow players to connect to their local one. This presents two main issues however. Firstly, this prevents players in different geographical regions from playing together and therefore separates the community. Also, the issue of players in remote areas playing together and having a suboptimal experience due to the server lag, has not been addressed. The developers of Battlefield 1 have implemented an interesting solution to this problem which will be discussed further on in Section \ref{sec:bf1_ping}.
 
 
 \newpage
@@ -68,7 +68,7 @@ The paper \mycite{Carter2009} provides an example of a game called ``Panzer Batt
 
 
 \chapter{Related work}
-Throughout this chapter, I will be investigating how networking is implemented in popular modern AAA games. I will also implement a simple online, multiplayer demo game using different ways of implementing networking in the Unity game engine. The experience of using the options that exist in Unity for network game development, will be similar to what I will aim to implement at a much lower level with my networking template.
+The purpose of this chapter, is to investigate how networking is implemented in popular modern AAA games. To further the research in this topic, an analysis of the development process of using the networking tools available in the Unity game engine will be done.
 
 \section{Networking implementations in games}
 
@@ -111,8 +111,7 @@ Finally, an option called ``time warp'' can be utilised for synchronising game s
 The system of ``local lag'' assumes that inconsistencies will always occur whereas ``time warp'' can often be considered to be ``optimistic approaches'' because they allow each client to calculate their simulation state assuming no inconsistencies. Both implementations have uses in different scenarios.
 
 \section{Other networking development tools}
-In this section, I will identify and investigate some tools that are available to developers for networked game development as well as potential new technologies that could make a large imact on multiplayer online games.
-
+This section houses the research done that is not related to analysing game netcode. Here, other developement tools and platforms that are available to developers are explored. The implementation and usage of tools in the Unity engine will also be explored here and will assist in the design of the GNAT library.
 
 \subsection{Google's Stadia and future networking options}
 At the Game Developers Conference in March 2019, Google has announced a new Game Streaming platform. The talk outlined the plans that would allow developers to develop games for their Linux based platform that would run the game code on Google servers. Users of this service, would be able to play games by sending their inputs to the google servers. All game logic processing would then take place on the Google servers and the audio and video would be returned to the player. This service could potentially allow players to play games on devices with very little processing power, with settings that would normally require much more power.
@@ -123,9 +122,9 @@ The largest potential issue with a system like this could be the latency between
 
 
 \subsection{Networking options in Unity}
-A game engine has been described as a core of controlling games by providing the main framework and common functions in the paper \mycite{xie2012research}. Unity is just one example of many different game engines that are available to a developer, which all aim for the same unified goal but try to achieve it in different ways. Unity is a popular choice for projects ranging from small indie titles to large AAA productions and it is known for being relatively easy to use and prototype with. To investigate the options that are available in the market for online game development, I have decided to investigate how networking functionality can be implemented in this game engine.
+A game engine has been described as a core of controlling games by providing the main framework and common functions in the paper \mycite{xie2012research}. Unity is just one example of many different game engines that are available to a developer, which all aim for the same unified goal but try to achieve it in different ways. Unity is a popular choice for projects ranging from small indie titles to large AAA productions and it is known for being relatively easy to use and prototype with. To investigate the options that are available in the market for online game development, I have explored the tools available in the Unity engine. The following sections detail my experiance with using the tools.
 
-I have implemented a simple 2D game which allows the player fire a projectile, jump and move their character left and right. The goal with this project was to go through the process of transforming a simple, single player game to a simple multiplayer game through the use of different options available in Unity.
+I have implemented a simple 2D game which allows the player to fire a projectile, jump and move their character left and right. The goal with this project was to go through the process of transforming a simple, single player game to a simple multiplayer game through the use of different options available in Unity.
 
 \subsubsection{UNET}
 The first method of networking that I have decided to investigate was Unity's own UNET library. UNET uses the client hosted model that requires one client to act as a game server allowing others to connect to it. The joining clients need to know the IP address of the host in order to connect to them and the host can either join the game themselves or act purely as a server. The figures \ref{fig:unet_ui}, \ref{fig:main} and \ref{fig:in_game}, show screenshots of the default UI that is provided by the library as well as my game showing the main menu, client and server perspectives respectively. The tile-based pixel art used in the game has been found on the Unity Asset Store under the name ``Sunny Land Forest'' and has been designed by Ansimuz.
