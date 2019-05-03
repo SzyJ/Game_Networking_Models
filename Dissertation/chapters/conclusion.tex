@@ -3,18 +3,18 @@
 
 
 \section{Testing my implementation}
-In order to keep tests fair, it is important to keep as much of the environment constant as possible between test iterations. Each iteration should have one variable that is changed so that the effects of this change can be easily observed and analysed. I have decied to investigate how changing the volume of traffic that is sent between client on a consumer network, effects the jitter with which the messages arrive.
+In order to keep tests fair, it is important to keep as much of the environment constant as possible between test iterations. Each iteration should have one variable that is changed so that the effects of this change can be easily observed and analysed. The following sections will outline the tests on how changing the volume of traffic that is sent between clients on a consumer network, effects the jitter with which the messages arrive.
 
-The test is set up using the client hosted model where the clients are connected to the network on both an ethernet connection and WiFi. The host is connected to the router over ethernet cables that go through a switch. One client that will connect to the host is started on the same machine as the server; I will refer to this client as the ``localhost client''. Another client is connected directly to the router and I will refer to this one as ``ethernet client''. The last client that will connect to the host, is a laptop that is close to the router and connected over WiFi, this will be refered to as the ``WiFi client''.
+The test is set up using the client hosted model where the clients are connected to the network on both an ethernet connection and WiFi. The host is connected to the router over ethernet cables that go through a switch. One client that will connect to the host is started on the same machine as the server; this client will be refered to as the ``localhost client''. Another client is connected directly to the router and it will be refered to as the ``ethernet client''. The last client that will connect to the host, is a laptop that is close to the router and connected over WiFi, this will be refered to as the ``WiFi client''.
 
-Once the connection has been established, the server tickrate can be configured. This will be the variable that I will change and observe the effects of at each stage of the experiment. To minimise any external factors that could effect this experiment, I have also ran all tests at night when the network is under least stress.
+Once the connection has been established, the server tickrate can be configured. This will be the variable that will be changed and the effects of this will be observed at each stage of the experiment. To minimise any external factors that could effect this experiment, all tests were performed at night when the network is under least stress.
 
 \subsection{Capturing and analysing the results}
-When writing my library, one of the most important features that I made sure to finish first is a custom wrapper for a logging library that would go on to be used extensively during the developement and testing. The code is written in such a way that any action that is done is logged under different logging levels depending on the nature of the information. One piece of information that is logged whenever a message is received by a client, is the time that has elapsed since the last message that has been received. This information can then in turn be used to calculate the jitter of incomming messages and this is what I have done in my experiment.
+When writing the GNAT library, one of the most important features was the custom wrapper for a logging library that would go on to be used extensively during the development and testing. This wrapper allows for a message to be written to a log file from anywhere in the program. The library code is written in such a way that any action that is done, is logged under different logging levels depending on the nature of the information. One piece of information that is logged whenever a message is received by a client, is the time that has elapsed since the last message that has been received. This information can then in turn be used to calculate the jitter of incomming messages and this is what is used to generate data in the following experiments.
 
-I have used a simple script that used regex expressions on each log file (one for each client and therefore three for each test), that would look for lines where the jitter information is logged and extract the number from the rest of the line. The result would be a file with 1 number per line which can then be fed into another program to generate graphs. The analysis of this data and some examples of the graphs produced in this way, can be found under section \ref{sec:jitter_results}.
+A simple script was used to extract the values, on each log file (one for each client and therefore three for each test). The script would use RegEx to look for lines where the jitter information is logged and extract the number from the rest of the line. The output would be a file with 1 number per line which can then be fed into another program to generate graphs. The analysis of this data and some examples of the graphs produced in this way, can be found under the section \ref{sec:jitter_results}.
 
-In order to compare how varied the numbers were from one another, I have ran my results from each of the log files through a math function calculating the variance ($\sigma^2$) of the data. The analysis of this can be found in the section \ref{sec:variance_results}.
+In order to compare how varied the numbers were from one another, each result set, was fed as input into a math function calculating the variance ($\sigma^2$) of the data. The analysis of this can be found in the section \ref{sec:variance_results}.
 
 \newpage
 \subsection{Jitter between WiFi and Ethernet connections} \label{sec:jitter_results}
@@ -30,20 +30,35 @@ An effect that can be observed with the different tick-rates, is that it is much
 
 
 \subsection{Calculating the variance in jitter}\label{sec:variance_results}
-The next question that I was interested in anwsering was: Objectively, which collection of gathered data, had the least variance in it? This data can be seen represented in a bar chart in figure \ref{fig:jitter_variance}. I have found that the $\sigma^2$ values for WiFi at the tickrate of 500 and 1000 milliseconds, were much larger than the other results due to having to wait for a much longer time if a packet was lost. Even when not considering these anomalous values however, it can be seen that the varience in the receiving rate is on average 30\% larger than the average of ethernet and localhost data.
+The next question to anwser was: Objectively, which collection of gathered data, had the least variance in it? This data can be seen represented in a bar chart in figure \ref{fig:jitter_variance}. The $\sigma^2$ values for WiFi at the tickrate of 500 and 1000 milliseconds, were much larger than the other results due to having to wait for a much longer time if a packet was lost. Even when not considering these anomalous values however, it can be seen that the varience in the receiving rate is on average 30\% larger than the average of ethernet and localhost data.
 
- even the localhost client experianced a certain level of jitter. This is likely be due to the operating system prioritising certain programs over others as well how the NIC hardware and winsock manages sending and receiving of data.
+One unexpetced result was that even the localhost client experianced a certain level of jitter in all tests. This is likely be due to the operating system prioritising certain programs over others as well how the NIC hardware and winsock manages sending and receiving of data.
 
-Another surprising result was once again seen at the 8ms test. Following on from the previous section, it can be seen that he variance of the data incereases when compared to the other results despite what would intuitively be the most ``reliable'' constant stream of data. The fact that the rise can be seen in all three clients, indicates that there may be some external factor (such as my computer's NIC or consumer grade router hardware), that interferes with these results. In general, it is unlikely to see broadcast rates higher than 63Hz (around 16ms delay).
+Another surprising result was once again seen at the 8ms test. Following on from the previous section, it can be seen that the variance of the data incereases when compared to the other results despite what would intuitively be the most ``reliable'' constant stream of data. The fact that the rise can be seen in all three clients, indicates that there may be some external factor (such as my computer's NIC or consumer grade router hardware), that interferes with these results. In general however, it is unlikely to see broadcast rates higher than 63Hz (around 16ms delay) anyway.
 
 \input{fixtures/variance_graph}
 
 \chapter{Conclusion}
-TODO
-
+This chapter presents a conclusion of the project based on the aims and objectives that were outline in section \ref{sec:aims_and_objectives}. The following sections will discuss the projects success by determining if each objective has been met and as a result, if the aim of the project has been met.
 
 \section{Satisfaction of the Aims and Objectives}
-TODO
+\begin{enumerate}
+\item Investigate the common practices and techniques used in modern multiplayer games
+  \\\\
+  Extensive research into what kind of netcode different examples of popular, modern games use has been done and network development tools in the Unity game engine have been tested through real-world use. The nature of choosing a networking model is a choice that rarely has a concrete single anwser. It is often the case that within the same game instance, multiple different networking models are used for synchronising different aspects of the simulation. For example, one of the players might be hosting the physics server for other players, but the rest of the simulation is synchronised through the peer to peer model instead, taking advantage of faster communication between any two players but having the game physics synchronised between all clients through a single instance.
+
+
+\item Implement the peer to peer and client hosted networking models as a C++ library.
+  \\\\
+  TODO
+
+\item Investigate issues spawned from computer network communication using the implemented networking models in the GNAT library.
+  \\\\
+  TODO
+\end{enumerate}
+
+
+
 
 
 \section{What has been established and what could be done further}

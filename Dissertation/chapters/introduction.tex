@@ -3,7 +3,7 @@ This chapter will introduce this dissertation's subject area, present the purpos
 
 
 \section{Subject Area}
-A significant share of today's network traffic, consists of game networking. This is due to the emence amount of data that fundamentally, has to be sent from client to client (or server) in order to keep a simulation synchronised between several participants. The general aim of any real-time simulation, such as an online multiplayer video-game, is for any action that is performed by one participant, to be replicated within the simulation of all other participants. For example in an online multiplayer game that allows for movement of a character with a press of a button, if this button is pressed by one player, all players should see this character move in their instances of the game, from their own perspectives. There are several ways in which this can be achieved.
+A significant share of today's network traffic, consists of game networking. This is partialy due to the emence amount of data that fundamentally, has to be sent from client to client (or server) in order to keep a simulation synchronised between several participants, however there is also an ``always online'' trend can also be seen throughout many new game releases and internet culture. The general aim of any real-time simulation, such as an online multiplayer video-game, is for any action that is performed by one participant, to be replicated within the simulation of all other participants. For example in an online multiplayer game that allows for movement of a character with a press of a button, if this button is pressed by one player, all players should see this character move in their instances of the game, from their own perspectives. There are several ways in which this can be achieved.
 
 The most common way in which a simulation is synchronised across several users, involves introducing a trusted 3rd party entity, such as a dedicated server, that would essentially determine the ``Real'' state of the simulation at any given time. Each client participating in a game instance, would submit their changes to this server which would then implement them into it's own state after checking that these changes are valid. The ``Real'' state would be broadcast periodically to each client so that everyone can update their local simulations to what is received from the server. Introducing a central entity like this provides a lot of advantages for both the players and developers. Some examples of advantages include relative fairness in latency between all players and effective implementation of a cheat prevention system that is possible because the developers control how the server works.
 
@@ -11,7 +11,7 @@ While this solution provides a lot of benefits to the playerbase of a game, it m
 
 The game servers must be capable of handling a large amount of network traffic and must be powerful enough to run many simulation instances and broadcast the state of each many times a second. What makes this issue worse, is that if not enough of these servers are deployed, the experience of all players is compromised through large differences in player ping. This means that the rented server space not only has to be very powerful, but also available in as many regions of the world as possible.
 
-An alternative for developers who do not have the budget, or find game servers to be a risky investment, is to allow player to connect to each other's game clients directly. Despite introducing some compromises, providing a service that lets players play with each other directly, may also introduce some new advantages for the players as well as the developers. There are two main methods of achieving a synchronised simulation this way; the peer to peer model and the client hosted model. The focus of this dissertation is to identify the positive and negative attributes of each networking model and to discuss the different issues that are introduced along with techniques to fix them.
+An alternative for developers who do not have the budget, or find game servers to be a risky investment, is to allow players to connect to each other's game clients directly. Despite introducing some compromises, providing a service that lets players play with each other directly, may also introduce some new advantages for the players as well as the developers. There are two main methods of achieving a synchronised simulation this way; the peer to peer model and the client hosted model. The focus of this dissertation is to identify the positive and negative attributes of each networking model and to discuss the different issues that are introduced along with techniques to fix them.
 
 
 \section{Project Purpose}
@@ -34,7 +34,7 @@ This is also likely due to how fundamentally different the programming approach 
 
 
 \newpage
-\section{Aims and Objectives}
+\section{Aims and Objectives}\label{sec:aims_and_objectives}
 The aim of this dissertation is to compare examples of different methods of implementing server-less, real-time networking. It will also investigate into methods of dealing with common issues that fundamentally arrise in computer networking.
 \\\\
 These aims can be devided into three seperate objectives:
@@ -48,7 +48,7 @@ These aims can be devided into three seperate objectives:
 
 \item Implement the peer to peer and client hosted networking models as a C++ library.
   \\\\
-  The focus of this project is on server-less, real-time networking. Two commonly used strategies, that are used in the industry to support this idea, have been identified; peer to peer and client hosting. Both startegies strive for the same goal, however fundamentally employ different methods of achieving this.
+  The focus of this project is on server-less, real-time networking. Two commonly used strategies, that are used in the industry to support this idea, have been identified as; peer to peer and client hosting. Both startegies strive for the same goal, however fundamentally employ different methods of achieving this.
   The workings of each model's networking logic, will be implemented from scratch so that any configurable variables can be easily controlled and any unnecessary bloat, unrelated to this project's investigation, does not effect the results.
   From this point onwards, the name used to refer to this project will be the ``GNAT (Game Networking API Template)'' library.
 

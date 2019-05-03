@@ -227,7 +227,41 @@ Before the start of the development process, it is important to consider what re
 The classes that are intended for a user of the GNAT library to instanciate in their code, will have public functions that will perform the networking logic associated with the model in use. In this section, the intended use for these functions is planned out along with their actions and return values.
 
 \subsection{Error code constants}
-Whenever possible, each function that has a non-trivial purpose (this does not apply to get and set functions), should return a signed integer value whenever possible. After calling the function, the return value can be checked and from this, it should be possible to determine if the function execution was successful or if and what error has occurred. Generally, if the returned integer is a negative value, the function did not manage to complete what it was supposed to do, or the execution has not completed successfully. This negative value can be compared against known errors that can occur to determine what has happened. This set of expected outcomes will exist in a header file which will contain a different negative value for each error that can happen and a positive value for any other information that should be returned after a successful execution. For performance reasons, these values will be defined as \lstinline{#define} precompiler statements.
+Whenever possible, each function that has a non-trivial purpose (this does not apply to get and set functions), should return a signed integer value whenever possible. After calling the function, the return value can be checked and from this, it should be possible to determine if the function execution was successful or if and what error has occurred. Generally, if the returned integer is a negative value, the function did not manage to complete what it was supposed to do, or the execution has not completed successfully. This negative value can be compared against known errors that can occur to determine what has happened. This set of expected outcomes will exist in a header file which will contain a different negative value for each error that can happen and a positive value for any other information that should be returned after a successful execution. For performance reasons, these values will be defined as \lstinline{#define} precompiler statements. An exmaple of implementation of this idea can be seen in figure \ref{fig:error_codes}.
+
+\begin{figure}[!h]
+  \centering
+\begin{lstlisting}
+// Startup
+#define STARTUP_SUCCESSFUL 0
+#define WINSOCK_STARTUP_FAIL -1
+#define SOCKET_CREATION_FAIL -2
+#define BINDING_SOCKET_FAIL -3
+#define GETTING_PORT_FAILED -4
+#define GET_ADDR_INFO_FAILED -5
+
+// Client
+#define FAILED_TO_CONNECT_TO_SERVER -6
+#define NOT_CONNECTED_TO_SERVER -7
+#define INVALID_CLIENT_ID -8
+#define CONNECTION_ESTABLISHED 0
+
+// Sending Messages
+#define FAILED_TO_SEND_MESSAGE -9
+
+// Receiving Messages
+#define NO_MESSAGE_TO_RECEIVE 0
+#define UNEXPECTED_MESSAGE -10
+#define EXEPTION_DURING_MSG_RECEIVE -11
+
+#define UNEXPECTED_PROGRAM_STATE -99
+
+typedef int Error_Code;
+\end{lstlisting}
+
+  \caption{Example code for a header file containing the error messages}
+  \label{fig:error_codes}
+\end{figure}
 
 
 \newpage
