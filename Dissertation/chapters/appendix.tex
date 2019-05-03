@@ -11,6 +11,29 @@
 \section{Peer to Peer model}
 \input{fixtures/p2p_attributes}
 
+\chapter{Jitter Variance table}
+
+\begin{table}[!h]
+  \centering
+  \begin{tabular}{ l r r r }
+    \toprule
+    Delay between messages (ms) & WiFi & Ethernet & Localhost \\
+    \midrule
+
+     8     & 3.67E-06       & 3.74E-06 & 3.46E-06 \\
+     64    & 8.81E-07       & 5.67E-07 & 4.61E-07 \\
+     125   & 1.54E-06       & 8.68E-07 & 8.16E-07 \\
+     250   & 1.46E-06       & 9.19E-07 & 7.72E-07 \\
+     500   & 3.62E-05       & 1.63E-07 & 8.40E-08 \\
+     1000  & 0.009563789805 & 3.18E-07 & 1.84E-07 \\
+
+    \bottomrule
+  \end{tabular}
+  \caption{Table showing the variance values of the jitter seen in test result}
+  \label{table:var_table}
+\end{table}
+
+
 \chapter{Developement Issues}
 \begin{figure}[!h]
   \centering
@@ -57,11 +80,6 @@ When developing a project that uses code that will not change, such as the std l
 \begin{lstlisting}
 #include "pch.h"
 \end{lstlisting}
-
-
-
-
-
 
 
 \section{Logging library wrapper}
