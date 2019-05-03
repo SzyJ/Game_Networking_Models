@@ -85,6 +85,7 @@ Throughout the document, the main issues that are encountered when developing re
 
 Through the investigation of the modern game netcode that has been documented in the section \ref{sec:net_in_games} and beyond, it can be concluded that the most popular networking model design for games that wish to avoid a dedicated game server, is a peer to peer system with some elements of the game being moved to a client hosted server hosted by one of the peers. The state of this server is cloned periodically but the local copy is not respected and is only useful when a host migration has to occur. If a game is designed in ``zones'' that allow a player to freely enter and leave, the host migration system can be designed in such a way that as the player approaches another ``zone'', the migration process begins such that when the player fully leaves, the game does not have to pause to allow for this process to take place.
 
+The implementation of the GNAT library has been done with minimal features and could definately be expanded further.
 
 
 \section{What went well}
