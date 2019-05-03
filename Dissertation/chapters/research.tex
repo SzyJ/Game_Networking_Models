@@ -34,19 +34,15 @@ Netcode developers of the most popular games, have tried many different solution
 
 \newpage
 \section{Networking Model Options}
-There are several different ideas that exist as a solution to the problem of synchronising multiple game clients over a network. The three that are most relevant to this document are the centralised (and distributed) server model, the client hosted model and the peer to peer model. Game netcode developers have to choose one, or multiple, of these implementations when designing their networking logic. Each model has both positive and negative attributes and in the following sections, they will be discussed.
+There are several different ideas that exist as a solution to the problem of synchronising multiple game clients over a network. The three that are most relevant to this document are the centralised (and distributed) server model, the client hosted model and the peer to peer model. Game netcode developers have to choose one, or multiple, of these implementations when designing their networking logic. Each model has both positive and negative attributes and in the following sections, they will be discussed. The attributes of each model can be found in Appendix \ref{app:attributes}.
 
 
 \subsection{The Centralised Server Model}
 Most AAA online multiplayer games that are played today, make use of the ``centralised server model'' for synchronising the simulation state between several clients participating in the same simulation. This means that in an example of a First Person Shooter (FPS), if one player presses the ``jump'' key, their character will jump on their screen. This input information would then also be sent over to the game server. The server would then send the information that this player has jumped, to all other clients. There is a potential problem here however. Given that the ping between the server and client A is \(\alpha\) and between the server and client B is \(\beta\), the time between client A pressing an input and client B being notified of this input can not be less than $\alpha+\beta$ and due to the limitations of physics $\alpha>0$ and $\beta>0$. This means that at any given time the lag experienced between clients A and B will be more than $\alpha+\beta$ when aspects such as server tick-rate or network congestion are factored in too.
 
-\input{fixtures/cs_attributes}
-
 
 \subsection{Client Hosted Model}
 The client hosted model is an example of implementing a networking infrastructure without the need for expensive server rental. One of the main advantages of this solution is the idea that one codebase can be written to work as a client hosted model and this codebase can then be adjusted slightly to work on a central server as well if there ever is a need for this in the future. The basic idea behind this implementation method, is that one of the clients, would act as a server for all other participants alongside also being one of the participants. One of the biggest problems with an implementation like this, is that the player that is hosting the game will have a connection to the server with the ping and latency of 0 which will give them an objective advantage in scenarios where quick reaction times are needed. Another potential concern with an implementation like this, is that the player hosting the game, is likely to have consumer grade, lower-end hardware and network connection. It is also possible that a WiFi connection would be used increasing the chance of packet loss and high latency further. There is also a security concern with any networking application that, in order to function, has to know the IP address of every player that is connected. This information can be easily used to determine the country or even the city that the player is connecting from. It would also be possible to find out information about their hardware or network connection through how frequently a packet arrives from this player. A difficulty can also arise if the host player loses connection to the other players as either the game has to finish or a ``host migration'' would have to take place which is a difficult problem.
-
-\input{fixtures/ch_attributes}
 
 
 \subsection{Peer to Peer Model}
@@ -60,8 +56,6 @@ Since each player is communicating with every other client, there is no central 
 
 The paper \mycite{Carter2009} provides an example of a game called ``Panzer Battalion'', where ``each peer computes its own game version, no player is having disadvantages because of high network lags''. This is an example of a game that uses the peer to peer model to allow for players to play together. The authors also explain that removing a central point of failure, an implementation like this has led to ``contradicting game states'' which could potentially ruin the game experience.
 
-
-\input{fixtures/p2p_attributes}
 
 
 \chapter{Related work}
